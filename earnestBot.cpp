@@ -45,6 +45,11 @@ bool isSoldier(int i, int j, int n, int m, int oppCol, int oppTownCol, vector<ve
 	return true;
 }
 
+bool isOpponent(vector<vector<int> > &board,int i,int j,int oppCol)
+{
+	return (board[i][j]==oppCol);
+}
+
 vector<vector<int> > changeBoard(vector<vector<int> > board, int a, int b, int c, int d,int cannonMove)
 {
 	if(cannonMove)
@@ -60,6 +65,12 @@ vector<vector<int> > changeBoard(vector<vector<int> > board, int a, int b, int c
 double eval(vector<vector<int> > &board, int solCol, int townCol, int oppCol, int oppTownCol)
 {
 	int n=board.size(),m=board[0].size();
+	int fmove,bmove;
+
+	if(solCol==white)
+		fmove=1,bmove=-2;
+	else
+		fmove=-1,bmove=2;
 
 	int numOfSol=0,posCannonAttk=0,posOppAttk=0,posOppAttkOnTH=0,posAttkOnTH;
 
@@ -72,66 +83,25 @@ double eval(vector<vector<int> > &board, int solCol, int townCol, int oppCol, in
 
 			if(board[i][j]==townCol)
 			{
-				if(i==0)
-				{
-					if(i+1<n && board[i+1][j]==oppCol) posOppAttkOnTH++;
-					if(i+1<n && j+1<m && board[i+1][j+1]==oppCol) posOppAttkOnTH++;
-					if(i+1<n && j-1>=0 && board[i+1][j-1]==oppCol) posOppAttkOnTH++;
-				}
-				else
-				{
-					if(i-1>=0 && board[i-1][j]==oppCol) posOppAttkOnTH++;
-					if(i-1>=0 && j+1<m && board[i-1][j+1]==oppCol) posOppAttkOnTH++;
-					if(i-1>=0 && j-1>=0 && board[i-1][j-1]==oppCol) posOppAttkOnTH++;
-				}
+				if(boardCell(i+fmove,j,n,m) && isOpponent(board,i+fmove,j,oppCol)) posOppAttkOnTH++;
+				if(boardCell(i+fmove,j+1,n,m) && isOpponent(board,i+fmove,j+1,oppCol)) posOppAttkOnTH++;
+				if(boardCell(i+fmove,j-1,n,m) && isOpponent(board,i+fmove,j-1,oppCol)) posOppAttkOnTH++;
 			}
+			
 			if(board[i][j]==oppTownCol)
 			{
-				if(i==0)
-				{
-					if(i+1<n && board[i+1][j]==solCol) posAttkOnTH++;
-					if(i+1<n && j+1<m && board[i+1][j+1]==solCol) posAttkOnTH++;
-					if(i+1<n && j-1>=0 && board[i+1][j-1]==solCol) posAttkOnTH++;
-				}
-				else
-				{
-					if(i-1>=0 && board[i-1][j]==solCol) posAttkOnTH++;
-					if(i-1>=0 && j+1<m && board[i-1][j+1]==solCol) posAttkOnTH++;
-					if(i-1>=0 && j-1>=0 && board[i-1][j-1]==solCol) posAttkOnTH++;
-				}
+				if(boardCell(i-fmove,j,n,m) && isOpponent(board,i-fmove,j,oppCol)) posAttkOnTH++;
+				if(boardCell(i-fmove,j+1,n,m) && isOpponent(board,i-fmove,j+1,oppCol)) posAttkOnTH++;
+				if(boardCell(i-fmove,j-1,n,m) && isOpponent(board,i-fmove,j-1,oppCol)) posAttkOnTH++;
 			}
-		}
-	}
 
-	if(solCol==white)
-	{
-		for(int i=0;i<n;i++)
-		{
-			for(int j=0;j<n;j++)
+			if(board[i][j]==solCol)
 			{
-				if(board[i][j]!=white) continue;
-
-				if(i+1<n && board[i+1][j]==black) posOppAttk++;
-				if(i+1<n && j+1<m && board[i+1][j+1]==black) posOppAttk++;
-				if(i+1<n && j-1>=0 && board[i+1][j-1]==black) posOppAttk++;
-				if(j-1>=0 && board[i][j-1]==black) posOppAttk++;
-				if(j+1<m && board[i][j+1]==black) posOppAttk++;
-			}
-		}
-	}
-	else
-	{
-		for(int i=0;i<n;i++)
-		{
-			for(int j=0;j<n;j++)
-			{
-				if(board[i][j]!=black) continue;
-
-				if(i-1>=0 && board[i-1][j]==white) posOppAttk++;
-				if(i-1>=0 && j-1>=0 && board[i-1][j-1]==white) posOppAttk++;
-				if(i-1>=0 && j+1<m && board[i-1][j+1]==white) posOppAttk++;
-				if(j-1>=0 && board[i][j-1]==white) posOppAttk++;
-				if(j+1<m && board[i][j+1]==white) posOppAttk++;
+				if(boardCell(i+fmove,j,n,m) && isOpponent(board,i+fmove,j,oppCol)) posOppAttk++;
+				if(boardCell(i+fmove,j+1,n,m) && isOpponent(board,i+fmove,j+1,oppCol)) posOppAttk++;
+				if(boardCell(i+fmove,j-1,n,m) && isOpponent(board,i+fmove,j-1,oppCol)) posOppAttk++;
+				if(boardCell(i,j+1,n,m) && isOpponent(board,i,j+1,oppCol)) posOppAttk++;
+				if(boardCell(i,j-1,n,m) && isOpponent(board,i,j-1,oppCol)) posOppAttk++;
 			}
 		}
 	}
