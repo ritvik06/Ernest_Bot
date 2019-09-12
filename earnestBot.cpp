@@ -282,6 +282,22 @@ void allBranches(vector<node> &child, vector<vector<int> > &board, int solCol, i
 						temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j));
 						child.pb(temp);
 					}
+					if(boardCell(i-fmove,j,n,m))
+					{
+						temp.board=changeBoard(board,i+2*fmove,j,i-fmove,j,false);
+						temp.score=eval(temp.board,solCol,townCol,oppCol,oppTownCol);
+						temp.isCannonMove=false;
+						temp.changeCoordi=mp(mp(i+2*fmove,j),mp(i-fmove,j));
+						child.pb(temp);
+					}
+					if(boardCell(i+3*fmove,j,n,m))
+					{
+						temp.board=changeBoard(board,i,j,i+3*fmove,j,false);
+						temp.score=eval(temp.board,solCol,townCol,oppCol,oppTownCol);
+						temp.isCannonMove=false;
+						temp.changeCoordi=mp(mp(i,j),mp(i+3*fmove,j));
+						child.pb(temp);
+					}
 				}
 
 				/*Right Diagonal Cannon*/
@@ -319,6 +335,22 @@ void allBranches(vector<node> &child, vector<vector<int> > &board, int solCol, i
 						temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j-3));
 						child.pb(temp);
 					}
+					if(boardCell(i-fmove,j-1,n,m))
+					{
+						temp.board=changeBoard(board,i+2*fmove,j+2,i-fmove,j-1,false);
+						temp.score=eval(temp.board,solCol,townCol,oppCol,oppTownCol);
+						temp.isCannonMove=false;
+						temp.changeCoordi=mp(mp(i+2*fmove,j+2),mp(i-fmove,j-1));
+						child.pb(temp);
+					}
+					if(boardCell(i+3*fmove,j+3,n,m))
+					{
+						temp.board=changeBoard(board,i,j,i+3*fmove,j+3,false);
+						temp.score=eval(temp.board,solCol,townCol,oppCol,oppTownCol);
+						temp.isCannonMove=false;
+						temp.changeCoordi=mp(mp(i,j),mp(i+3*fmove,j+3));
+						child.pb(temp);
+					}
 				}
 
 				/*Left Diagonal Cannon*/
@@ -354,6 +386,22 @@ void allBranches(vector<node> &child, vector<vector<int> > &board, int solCol, i
 						temp.score=eval(temp.board,solCol,townCol,oppCol,oppTownCol);
 						temp.isCannonMove=true;
 						temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j+3));
+						child.pb(temp);
+					}
+					if(boardCell(i-fmove,j+1,n,m))
+					{
+						temp.board=changeBoard(board,i+2*fmove,j-2,i-fmove,j+1,false);
+						temp.score=eval(temp.board,solCol,townCol,oppCol,oppTownCol);
+						temp.isCannonMove=false;
+						temp.changeCoordi=mp(mp(i+2*fmove,j-2),mp(i-fmove,j+1));
+						child.pb(temp);
+					}
+					if(boardCell(i+3*fmove,j-3,n,m))
+					{
+						temp.board=changeBoard(board,i,j,i+3*fmove,j-3,false);
+						temp.score=eval(temp.board,solCol,townCol,oppCol,oppTownCol);
+						temp.isCannonMove=false;
+						temp.changeCoordi=mp(mp(i,j),mp(i+3*fmove,j-3));
 						child.pb(temp);
 					}
 				}
@@ -427,6 +475,6 @@ string ErnestMove(vector<vector<int> > &board, int solCol, int townCol, int oppC
 
 	pair<pii,pii> move=miniMaxWithAlphaBetaPruning(root,0,-inf,inf);
 
-	
+
 	return ("S "+to_string(move.fi.fi)+ " "+ to_string(move.fi.sec)+" M "+to_string(move.sec.fi)+" "+to_string(move.sec.sec));
 }
