@@ -62,6 +62,17 @@ vector<vector<int> > changeBoard(vector<vector<int> > board, int a, int b, int c
 	return board;
 }
 
+bool isCannon(vector<vector<int> > &board,int a1,int b1,int a2,int b2,int a3,int b3,int n, int m,int col)
+{
+	if(!(boardCell(a1,b1,n,m) && boardCell(a2,b2,n,m) && boardCell(a3,b3,n,m)))
+		return false;
+
+	if(!(board[a1][b1]==col && board[a2][b2]==col && board[a3][b3]==col))
+		return false;
+
+	return true;
+}
+
 double eval(vector<vector<int> > &board, int solCol, int townCol, int oppCol, int oppTownCol)
 {
 	int n=board.size(),m=board[0].size();
@@ -86,13 +97,19 @@ double eval(vector<vector<int> > &board, int solCol, int townCol, int oppCol, in
 				if(boardCell(i+fmove,j,n,m) && isOpponent(board,i+fmove,j,oppCol)) posOppAttkOnTH++;
 				if(boardCell(i+fmove,j+1,n,m) && isOpponent(board,i+fmove,j+1,oppCol)) posOppAttkOnTH++;
 				if(boardCell(i+fmove,j-1,n,m) && isOpponent(board,i+fmove,j-1,oppCol)) posOppAttkOnTH++;
+				if(isCannon(board,i+2*fmove,j,i+3*fmove,j,i+4*fmove,j,oppCol)) posOppAttkOnTH++;
+				if(isCannon(board,i+2*fmove,j-2,i+3*fmove,j-3,i+4*fmove,j-4,oppCol)) posOppAttkOnTH++;
+				if(isCannon(board,i+2*fmove,j+2,i+3*fmove,j+3,i+4*fmove,j+4,oppCol)) posOppAttkOnTH++;
 			}
-			
+
 			if(board[i][j]==oppTownCol)
 			{
-				if(boardCell(i-fmove,j,n,m) && isOpponent(board,i-fmove,j,oppCol)) posAttkOnTH++;
-				if(boardCell(i-fmove,j+1,n,m) && isOpponent(board,i-fmove,j+1,oppCol)) posAttkOnTH++;
-				if(boardCell(i-fmove,j-1,n,m) && isOpponent(board,i-fmove,j-1,oppCol)) posAttkOnTH++;
+				if(boardCell(i-fmove,j,n,m) && isOpponent(board,i-fmove,j,solCol)) posAttkOnTH++;
+				if(boardCell(i-fmove,j+1,n,m) && isOpponent(board,i-fmove,j+1,solCol)) posAttkOnTH++;
+				if(boardCell(i-fmove,j-1,n,m) && isOpponent(board,i-fmove,j-1,solCol)) posAttkOnTH++;
+				if(isCannon(board,i-2*fmove,j,i-3*fmove,j,i-4*fmove,j,solCol)) posOppAttkOnTH++;
+				if(isCannon(board,i-2*fmove,j-2,i-3*fmove,j-3,i-4*fmove,j-4,solCol)) posOppAttkOnTH++;
+				if(isCannon(board,i-2*fmove,j+2,i-3*fmove,j+3,i-4*fmove,j+4,solCol)) posOppAttkOnTH++;
 			}
 
 			if(board[i][j]==solCol)
@@ -109,17 +126,6 @@ double eval(vector<vector<int> > &board, int solCol, int townCol, int oppCol, in
 	double func=(numOfSol)-posOppAttk-posOppAttkOnTH+posAttkOnTH;
 
 	return func;
-}
-
-bool isCannon(vector<vector<int> > &board,int a1,int b1,int a2,int b2,int a3,int b3,int n, int m)
-{
-	if(!(boardCell(a1,b1,n,m) && boardCell(a2,b2,n,m) && boardCell(a3,b3,n,m)))
-		return false;
-
-	if(!(board[a1][b1]==solCol && board[a2][b2]==solCol && board[a3][b3]))
-		return false;
-
-	return true;
 }
 
 void allBranches(vector<node> &child, vector<vector<int> > &board, int solCol, int townCol, int oppCol, int oppTownCol)
@@ -218,7 +224,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board, int solCol, i
 
 				/*Cannon Moves*/
 				/*Orthogonal Cannon*/
-				if(isCannon(board,i,j,i+fmove,j,i+2*fmove,j,n,m))
+				if(isCannon(board,i,j,i+fmove,j,i+2*fmove,j,n,m,solCol))
 				{
 					if(boardCell(i+4*fmove,j,n,m))
 					{
@@ -271,7 +277,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board, int solCol, i
 				}
 
 				/*Right Diagonal Cannon*/
-				if(isCannon(board,i,j,i+fmove,j+1,i+2*fmove,j+2,n,m))
+				if(isCannon(board,i,j,i+fmove,j+1,i+2*fmove,j+2,n,m,solCol))
 				{
 					if(boardCell(i+4*fmove,j+4,n,m))
 					{
@@ -324,7 +330,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board, int solCol, i
 				}
 
 				/*Left Diagonal Cannon*/
-				if(isCannon(board,i,j,i+fmove,j-1,i+2*fmove,j-2,n,m))
+				if(isCannon(board,i,j,i+fmove,j-1,i+2*fmove,j-2,n,m,solCol))
 				{
 					if(boardCell(i+4*fmove,j-4,n,m))
 					{
