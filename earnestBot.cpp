@@ -19,7 +19,7 @@ move -- S a b M c d || S a b B c d
 */
 int empBlock=0, whiteSol=1, blackSol=2, whiteTown=3, blackTown=4;
 int solCol,oppCol,oppTownCol,townCol;
-int maxDepth=6;/*MiniMax made for maxDepth Even*/
+int maxDepth=2;/*MiniMax made for maxDepth Even*/
 int timelimit;	
 int numofCannons;
 
@@ -577,13 +577,13 @@ string ErnestMove(vector<vector<int> > &board)
 {
 	node root;
 	root.board=board;
-	
+	// cerr<<"Hello2"<<endl;
 	makeTree(root,0);
 
 	pair<pair<double,bool>,pair<pii,pii> > ans=miniMaxWithAlphaBetaPruning(root,0,-inf,inf);
-
+	// cerr<<"HI"<<endl;
 	pair<pii,pii> move=ans.sec;
-	
+
 	stringstream x1,x2,x3,x4;
 	x1<<move.fi.fi;
 	x2<<move.fi.sec;
@@ -608,7 +608,7 @@ int main(){
 
 	cin >> player_id >> n >> m >> timelimit;
 
-	if(player_id==1){
+	if(player_id==2){
 		solCol = 1;
 		townCol = 3;
 		oppCol =2;
@@ -623,10 +623,13 @@ int main(){
 
 	Board = initializeBoard(n,m);
 
-	if(player_id==0)
+	if(player_id==1)
 	{
 		string str = ErnestMove(Board) ;
-		cerr << str<< endl;
+		// cout << "S 7 7 M 4 2";
+		cout << str<<endl;
+		// cerr << "Moved";
+		// string str= "S 7 7 M 4 2";
 		stringstream ss;
 		ss<<str;
 		int x1,x2,x3,x4;
@@ -637,34 +640,46 @@ int main(){
 	while(true)
 	{
 		string str;
-		getline(cin,str);
-		stringstream ss;
-		ss<<str;
-		int x1,x2,x3,x4;
-		ss>>x1>>x2>>x3>>x4;
+		char t[6];
+		cin>>t[0]>>t[1]>>t[2]>>t[3]>>t[4]>>t[5];
+		// getline(cin,str);
+		// stringstream ss;
+		// ss<<str;
+		// string temp;
+		// ss>>temp;
+		// ss>>x1>>x2>>temp>>x3>>x4;
+		// cout<<"S 1 2 M 1 3"<<endl;
+		if(t[3]=='M')
+			Board = changeBoard(Board,(t[1]-'0'),(t[2]-'0'),(t[4]-'0'),(t[5]-'0'),0);
+		else
+			Board = changeBoard(Board,(t[1]-'0'),(t[2]-'0'),(t[4]-'0'),(t[5]-'0'),1);
+		// cerr<<"Hello"<<endl;
 
-		Board = changeBoard(Board,x1,x2,x3,x4,0);
-
-		if(isGameOver(Board, townCol, n, m))	{
+		/*if(isGameOver(Board, townCol, n, m))	{
 			pair<float,float> scores = finalScore(Board,solCol);
-			cout << "My score " << scores.fi << endl;
-			cout << "opponents score " << scores.sec << endl;
+			// cout << "My score " << scores.fi << endl;
+			// cout << "opponents score " << scores.sec << endl;
 			break;
-		}
+		}*/
 
+		// int x1,x2,x3,x4;
 		str = ErnestMove(Board) ;
-		stringstream sss;
-		sss<<str;
-		cerr << str << endl;
-		sss>>x1>>x2>>x3>>x4;
-		Board = changeBoard(Board,x1,x2,x3,x4,0);	
+		// stringstream sss;
+		// sss<<str;
+		cout << str<<endl;
+		// sss>>x1>>x2>>x3>>x4;
+		// cout<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<endl;
+		if(str[3]=='M')
+			Board = changeBoard(Board,str[1]-'0',str[2]-'0',str[4]-'0',str[5]-'0',0);	
+		else
+			Board = changeBoard(Board,str[1]-'0',str[2]-'0',str[4]-'0',str[5]-'0',1);	
 
-		if(isGameOver(Board, townCol, n, m))	{
+		/*if(isGameOver(Board, townCol, n, m))	{
 			pair<float,float> scores = finalScore(Board,solCol);
-			cout << "My score " << scores.fi << endl;
-			cout << "opponents score " << scores.sec << endl;
+			// cout << "My score " << scores.fi << endl;
+			// cout << "opponents score " << scores.sec << endl;
 			break;
-		}
+		}*/
 
 	}
 
