@@ -617,7 +617,7 @@ int main(){
 		Board = changeBoard(Board,stoi(str[2]),stoi(str[4]),stoi(str[8]),stoi(str[10]),0)
 
 		if(isGameOver(Board,int townCol, int n, int m))	{
-			pair<float,float> sccores = finalScore(board,solCol);
+			pair<float,float> scores = finalScore(board,solCol);
 			cout << "My score " << scores.fi << endl;
 			cout << "opponents score " << scores.sec << endl;
 			break;
