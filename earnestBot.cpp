@@ -19,6 +19,8 @@ move -- S a b M c d || S a b B c d
 int empBlock=0, whiteSol=1, blackSol=2, whiteTown=3, blackTown=4;
 int solCol,oppCol,oppTownCol,townCol;
 int maxDepth=6;/*MiniMax made for maxDepth Even*/
+int timelimit;	
+int numofCannons
 
 struct node
 {
@@ -29,12 +31,15 @@ struct node
 	bool isCannonMove;
 };
 
+
+// if the cell belongs to the board
 bool boardCell(int i, int j, int n, int m)
 {
 	if(i>=0 && j>=0 && i<n && j<m) return true;
 	return false;
 }
 
+//if there exists a soldier at (i,j)
 bool isSoldier(int i, int j, int n, int m, int oppCol, int oppTownCol, vector<vector<int> > &board)
 {
 	if(i>=0 && i<n && j>=0 && j<m)
@@ -45,11 +50,31 @@ bool isSoldier(int i, int j, int n, int m, int oppCol, int oppTownCol, vector<ve
 	return true;
 }
 
+//if at (i,j) there is an opponent
 bool isOpponent(vector<vector<int> > &board,int i,int j,int oppCol)
 {
 	return (board[i][j]==oppCol);
 }
 
+vector<vector<int> > initializeBoard(int n,int m)
+{
+	vector<vector<int> > Board(n, vector<int>(m,0));
+
+	for(int i=0;i<4;i++){
+		Board[0][2*i] = 3;
+		Board[n-1][2*i + 1] = 4;
+		for(int j=0;j<3:j++){
+			Board[j][2*i + 1] = 1;
+			Board[n-1-j][2*i] = 2;
+		}
+
+	}
+
+	return Board;
+
+}
+
+//represents the next state of the board after a move
 vector<vector<int> > changeBoard(vector<vector<int> > board, int a, int b, int c, int d,int cannonMove)
 {
 	if(cannonMove)
@@ -62,6 +87,7 @@ vector<vector<int> > changeBoard(vector<vector<int> > board, int a, int b, int c
 	return board;
 }
 
+//checks basic requirements of being a cannon, not the actual constraint of adjacency
 bool isCannon(vector<vector<int> > &board,int a1,int b1,int a2,int b2,int a3,int b3,int n, int m,int col)
 {
 	if(!(boardCell(a1,b1,n,m) && boardCell(a2,b2,n,m) && boardCell(a3,b3,n,m)))
@@ -72,6 +98,105 @@ bool isCannon(vector<vector<int> > &board,int a1,int b1,int a2,int b2,int a3,int
 
 	return true;
 }
+
+pair<int,int> count_towns(vector<vector<int> > &board, int townCol,int n,int m)
+{
+	int my_count=0,opp_count=0;
+
+		for(int i=0;i<4;i++){
+			if(townCol==3){
+				if(board[0][2*i]==3) count++;
+				if(board[n-1][2*i+1]==4) opp_count++;
+
+			}
+			else if(townCol==4){
+				if(board[n-1][2*i+1]==4) count++;	
+				if(board[0][2*i]==3) opp_count++;
+			}
+		}
+
+	return mp(count,opp_count);	
+}
+
+bool isGameOver(vector<vector<int> > &board,int townCol, int n, int m)
+{
+	pair<int, int> counts = count_towns(board,townCol,n,m);
+	int my_count = counts.fi;
+	int opp_count = counts.sec;
+
+	if(my_count<=2 || opp_count<=2){
+		return true;
+	}
+
+	return false;
+}
+
+bool isWinner(vector<vector<int> > &board,int townCol, int n, int m)
+{
+	pair<int, int> counts = count_towns(board,townCol,n,m);
+	int my_count = counts.fi;
+	int opp_count = counts.sec;
+
+	if(my_count==2) return false;
+	else return true;
+
+	return true;
+}
+
+float town_hall_score(int myHalls,int oppHalls)
+{
+	if(myHalls==4){
+		if(oppHalls==2) return 10;
+		else if(oppHalls==3) return 7;
+		else if (oppHalls==4) return 5;
+	}
+	else if(myHalls==3){
+		if(oppHalls==2) return 8;
+		else if(oppHalls==3) return 5;
+		else if (oppHalls==4) return 3;		
+	}
+
+	else if(myHalls==2){
+		else if(oppHalls==3) return 2;
+		else if (oppHalls==4) return 0;
+	}
+
+	return 0;
+
+}
+
+pair<float,float> finalScore(vector<vector<int> > &board, int solCol)
+{
+	int mySol=0,oppSol=0;
+
+	for(int i=0;i<n;i++){
+		for(int j=0;j<m;j++){
+			if(isSoldier(i,j,board.size(),board[0].size(),solCol,solCol+2,board)) mySol++;
+			else if (isSoldier(i,j,board.size(),board[0].size(),solCol,solCol+2,board)) oppSol++;
+		}
+	}
+
+	float mySolCount = mySol/100;
+	float oppSolCount = oppSol/100;
+
+	pair<int, int> counts = count_towns(board,solCol+2,board.size(),board[0].size())
+	int my_count = counts.fi;
+	int opp_count = counts.sec;
+
+	myScore = (town_hall_score(my_count,opp_count)) + mySolCount;
+	OppScore = (town_hall_score(opp_count,my_count)) + oppSolCount;
+
+
+	return (mp(myScore,OppScore));
+}
+
+/*evaluation function consists of next move attacks :-
+1. No of my team soldiers
+2. No of my team Cannon's that can attack
+3. No of attacks on my team by opponent
+4. No of townhalls my team can attack
+5. No of my townhalls under attack
+*/
 
 double eval(vector<vector<int> > &board, int solCol, int townCol, int oppCol, int oppTownCol)
 {
@@ -123,7 +248,10 @@ double eval(vector<vector<int> > &board, int solCol, int townCol, int oppCol, in
 		}
 	}
 
+	// Assign weights later
 	double func=(numOfSol)-posOppAttk-posOppAttkOnTH+posAttkOnTH;
+
+
 
 	return func;
 }
@@ -453,4 +581,60 @@ string ErnestMove(vector<vector<int> > &board, int solCol, int townCol, int oppC
 
 
 	return ("S "+to_string(move.fi.fi)+ " "+ to_string(move.fi.sec)+" M "+to_string(move.sec.fi)+" "+to_string(move.sec.sec));
+}
+
+int main(){
+	//start client
+	int n,m; 
+	vector<vector<int> > Board;
+
+	cin >> player_id >> n >> m >> timelimit;
+
+	if(player_id==1){
+		solCol = 1;
+		townCol = 3;
+		oppCol =2;
+		oppTownCol =4;
+	}
+	else{
+		solCol = 2;
+		townCol = 4;
+		oppCol =1;
+		oppTownCol =3;			
+	}
+
+	Board = initializeBoard(n,m);
+
+	if(player_id==0)
+		string str = ErnestMove(Board,solCol,townCol,oppCol,oppTownCol) << endl;
+		cerr << str;
+		Board = changeBoard(Board,stoi(str[2]),stoi(str[4]),stoi(str[8]),stoi(str[10]),0)
+
+	while(true)
+	{
+		getline(cin,str)
+
+		Board = changeBoard(Board,stoi(str[2]),stoi(str[4]),stoi(str[8]),stoi(str[10]),0)
+
+		if(isGameOver(Board,int townCol, int n, int m))	{
+			pair<float,float> sccores = finalScore(board,solCol);
+			cout << "My score " << scores.fi << endl;
+			cout << "opponents score " << scores.sec << endl;
+			break;
+		}
+
+		str = ErnestMove(Board,solCol,townCol,oppCol,oppTownCol) << endl;
+		cerr << str;
+		Board = changeBoard(Board,stoi(str[2]),stoi(str[4]),stoi(str[8]),stoi(str[10]),0)		
+
+		if(isGameOver(Board,int townCol, int n, int m))	{
+			pair<float,float> sccores = finalScore(board,solCol);
+			cout << "My score " << scores.fi << endl;
+			cout << "opponents score " << scores.sec << endl;
+			break;
+		}
+
+	}
+
+	return 0;
 }
