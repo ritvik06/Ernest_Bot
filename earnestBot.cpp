@@ -52,9 +52,9 @@ bool isSoldier(int i, int j, int n, int m, int oppCol, int oppTownCol, vector<ve
 }
 
 //if at (i,j) there is an opponent
-bool isOpponent(vector<vector<int> > &board,int i,int j,int col)
+bool isOpponent(vector<vector<int> > &board,int i,int j,int col1,int col2)
 {
-	return (board[i][j]==col);
+	return (board[i][j]==col1 || board[i][j]==col2);
 }
 
 vector<vector<int> > initializeBoard(int n,int m)
@@ -223,9 +223,9 @@ double eval(vector<vector<int> > &board)
 
 			if(board[i][j]==townCol)
 			{
-				if(boardCell(i+fmove,j,n,m) && isOpponent(board,i+fmove,j,oppCol)) posOppAttkOnTH++;
-				if(boardCell(i+fmove,j+1,n,m) && isOpponent(board,i+fmove,j+1,oppCol)) posOppAttkOnTH++;
-				if(boardCell(i+fmove,j-1,n,m) && isOpponent(board,i+fmove,j-1,oppCol)) posOppAttkOnTH++;
+				if(boardCell(i+fmove,j,n,m) && isOpponent(board,i+fmove,j,oppCol,oppCol)) posOppAttkOnTH++;
+				if(boardCell(i+fmove,j+1,n,m) && isOpponent(board,i+fmove,j+1,oppCol,oppCol)) posOppAttkOnTH++;
+				if(boardCell(i+fmove,j-1,n,m) && isOpponent(board,i+fmove,j-1,oppCol,oppCol)) posOppAttkOnTH++;
 				if(isCannon(board,i+2*fmove,j,i+3*fmove,j,i+4*fmove,j,oppCol)) posOppAttkOnTH++;
 				if(isCannon(board,i+2*fmove,j-2,i+3*fmove,j-3,i+4*fmove,j-4,oppCol)) posOppAttkOnTH++;
 				if(isCannon(board,i+2*fmove,j+2,i+3*fmove,j+3,i+4*fmove,j+4,oppCol)) posOppAttkOnTH++;
@@ -233,9 +233,9 @@ double eval(vector<vector<int> > &board)
 
 			if(board[i][j]==oppTownCol)
 			{
-				if(boardCell(i-fmove,j,n,m) && isOpponent(board,i-fmove,j,solCol)) posAttkOnTH++;
-				if(boardCell(i-fmove,j+1,n,m) && isOpponent(board,i-fmove,j+1,solCol)) posAttkOnTH++;
-				if(boardCell(i-fmove,j-1,n,m) && isOpponent(board,i-fmove,j-1,solCol)) posAttkOnTH++;
+				if(boardCell(i-fmove,j,n,m) && isOpponent(board,i-fmove,j,solCol,solCol)) posAttkOnTH++;
+				if(boardCell(i-fmove,j+1,n,m) && isOpponent(board,i-fmove,j+1,solCol,solCol)) posAttkOnTH++;
+				if(boardCell(i-fmove,j-1,n,m) && isOpponent(board,i-fmove,j-1,solCol,solCol)) posAttkOnTH++;
 				if(isCannon(board,i-2*fmove,j,i-3*fmove,j,i-4*fmove,j,solCol)) posOppAttkOnTH++;
 				if(isCannon(board,i-2*fmove,j-2,i-3*fmove,j-3,i-4*fmove,j-4,solCol)) posOppAttkOnTH++;
 				if(isCannon(board,i-2*fmove,j+2,i-3*fmove,j+3,i-4*fmove,j+4,solCol)) posOppAttkOnTH++;
@@ -243,18 +243,17 @@ double eval(vector<vector<int> > &board)
 
 			if(board[i][j]==solCol)
 			{
-				if(boardCell(i+fmove,j,n,m) && isOpponent(board,i+fmove,j,oppCol)) posOppAttk++;
-				if(boardCell(i+fmove,j+1,n,m) && isOpponent(board,i+fmove,j+1,oppCol)) posOppAttk++;
-				if(boardCell(i+fmove,j-1,n,m) && isOpponent(board,i+fmove,j-1,oppCol)) posOppAttk++;
-				if(boardCell(i,j+1,n,m) && isOpponent(board,i,j+1,oppCol)) posOppAttk++;
-				if(boardCell(i,j-1,n,m) && isOpponent(board,i,j-1,oppCol)) posOppAttk++;
+				if(boardCell(i+fmove,j,n,m) && isOpponent(board,i+fmove,j,oppCol,oppCol)) posOppAttk++;
+				if(boardCell(i+fmove,j+1,n,m) && isOpponent(board,i+fmove,j+1,oppCol,oppCol)) posOppAttk++;
+				if(boardCell(i+fmove,j-1,n,m) && isOpponent(board,i+fmove,j-1,oppCol,oppCol)) posOppAttk++;
+				if(boardCell(i,j+1,n,m) && isOpponent(board,i,j+1,oppCol,oppCol)) posOppAttk++;
+				if(boardCell(i,j-1,n,m) && isOpponent(board,i,j-1,oppCol,oppCol)) posOppAttk++;
 			}
 		}
 	}
-
+	// cerr<<numOfSol<<endl;
 	// Assign weights later
 	double func=(numOfSol)-(posOppAttk)+100*posAttkOnTH;
-
 
 
 	return func;
@@ -286,7 +285,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 			{
 				node temp;
 				/*Forward Moves*/
-				if(boardCell(i+fmove, j, n, m) && !isOpponent(board,i+fmove,j,solCol))
+				if(boardCell(i+fmove, j, n, m) && !isOpponent(board,i+fmove,j,solCol,solCol))
 				{
 					temp.board=changeBoard(board,i,j,i+fmove,j,false);
 					temp.score=eval(temp.board);
@@ -294,7 +293,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 					temp.isCannonMove=false;
 					child.pb(temp);
 				}
-				if(boardCell(i+fmove,j+1,n,m) && !isOpponent(board,i+fmove,j+1,solCol))
+				if(boardCell(i+fmove,j+1,n,m) && !isOpponent(board,i+fmove,j+1,solCol,solCol))
 				{
 					temp.board=changeBoard(board,i,j,i+fmove,j+1,false);
 					temp.score=eval(temp.board);
@@ -302,7 +301,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 					temp.isCannonMove=false;
 					child.pb(temp);
 				}
-				if(boardCell(i+fmove,j-1,n,m) && !isOpponent(board,i+fmove,j-1,solCol))
+				if(boardCell(i+fmove,j-1,n,m) && !isOpponent(board,i+fmove,j-1,solCol,solCol))
 				{
 					temp.board=changeBoard(board,i,j,i+fmove,j-1,false);
 					temp.score=eval(temp.board);
@@ -340,7 +339,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 				/*Backward Moves*/
 				if(isSideMovePossible)
 				{
-					if(boardCell(i+bmove,j,n,m) && !isOpponent(board,i+bmove,j,solCol))
+					if(boardCell(i+bmove,j,n,m) && !isOpponent(board,i+bmove,j,solCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i+bmove,j,false);
 						temp.score=eval(temp.board);
@@ -348,7 +347,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.isCannonMove=false;
 						child.pb(temp);
 					}
-					if(boardCell(i+bmove,j-2,n,m) && !isOpponent(board,i+bmove,j-2,solCol))
+					if(boardCell(i+bmove,j-2,n,m) && !isOpponent(board,i+bmove,j-2,solCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i+bmove,j-2,false);
 						temp.score=eval(temp.board);
@@ -356,7 +355,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.isCannonMove=false;
 						child.pb(temp);
 					}
-					if(boardCell(i+bmove,j+2,n,m) && !isOpponent(board,i+fmove,j+2,solCol))
+					if(boardCell(i+bmove,j+2,n,m) && !isOpponent(board,i+fmove,j+2,solCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i+bmove,j+2,false);
 						temp.score=eval(temp.board);
@@ -370,7 +369,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 				/*Orthogonal Cannon*/
 				if(isCannon(board,i,j,i+fmove,j,i+2*fmove,j,solCol))
 				{
-					if(boardCell(i+4*fmove,j,n,m) && !isOpponent(board,i+4*fmove,j,solCol) && !isOpponent(board,i+3*fmove,j,oppCol))
+					if(boardCell(i+4*fmove,j,n,m) && !isOpponent(board,i+4*fmove,j,solCol,townCol) && !isOpponent(board,i+3*fmove,j,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i+4*fmove,j,true);
 						temp.score=eval(temp.board);
@@ -378,7 +377,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i+2*fmove,j),mp(i+4*fmove,j));
 						child.pb(temp);
 					}
-					if(boardCell(i+5*fmove,j,n,m) && !isOpponent(board,i+5*fmove,j,solCol) && !isOpponent(board,i+3*fmove,j,oppCol))
+					if(boardCell(i+5*fmove,j,n,m) && !isOpponent(board,i+5*fmove,j,solCol,townCol) && !isOpponent(board,i+3*fmove,j,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i+5*fmove,j,true);
 						temp.score=eval(temp.board);
@@ -386,7 +385,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i+2*fmove,j),mp(i+5*fmove,j));
 						child.pb(temp);
 					}
-					if(boardCell(i-2*fmove,j,n,m) && !isOpponent(board,i-2*fmove,j,solCol) && !isOpponent(board,i-fmove,j,oppCol))
+					if(boardCell(i-2*fmove,j,n,m) && !isOpponent(board,i-2*fmove,j,solCol,townCol) && !isOpponent(board,i-fmove,j,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i-2*fmove,j,true);
 						temp.score=eval(temp.board);
@@ -394,7 +393,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i,j),mp(i-2*fmove,j));
 						child.pb(temp);
 					}
-					if(boardCell(i-3*fmove,j,n,m) && !isOpponent(board,i-3*fmove,j,solCol) && !isOpponent(board,i-fmove,j,oppCol))
+					if(boardCell(i-3*fmove,j,n,m) && !isOpponent(board,i-3*fmove,j,solCol,townCol) && !isOpponent(board,i-fmove,j,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i-3*fmove,j,true);
 						temp.score=eval(temp.board);
@@ -402,7 +401,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j));
 						child.pb(temp);
 					}
-					if(boardCell(i-fmove,j,n,m) && !isOpponent(board,i-fmove,j,solCol) && !isOpponent(board,i-fmove,j,oppCol))
+					if(boardCell(i-fmove,j,n,m) && !isOpponent(board,i-fmove,j,solCol,townCol) && !isOpponent(board,i-fmove,j,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i+2*fmove,j,i-fmove,j,false);
 						temp.score=eval(temp.board);
@@ -410,7 +409,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i+2*fmove,j),mp(i-fmove,j));
 						child.pb(temp);
 					}
-					if(boardCell(i+3*fmove,j,n,m) && !isOpponent(board,i+3*fmove,j,solCol) && !isOpponent(board,i+3*fmove,j,oppCol))
+					if(boardCell(i+3*fmove,j,n,m) && !isOpponent(board,i+3*fmove,j,solCol,townCol) && !isOpponent(board,i+3*fmove,j,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i+3*fmove,j,false);
 						temp.score=eval(temp.board);
@@ -423,7 +422,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 				/*Right Diagonal Cannon*/
 				if(isCannon(board,i,j,i+fmove,j+1,i+2*fmove,j+2,solCol))
 				{
-					if(boardCell(i+4*fmove,j+4,n,m) && !isOpponent(board,i+4*fmove,j+4,solCol) && !isOpponent(board,i+3*fmove,j+3,oppCol))
+					if(boardCell(i+4*fmove,j+4,n,m) && !isOpponent(board,i+4*fmove,j+4,solCol,townCol) && !isOpponent(board,i+3*fmove,j+3,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i+4*fmove,j+4,true);
 						temp.score=eval(temp.board);
@@ -431,7 +430,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i+2*fmove,j+2),mp(i+4*fmove,j+4));
 						child.pb(temp);
 					}
-					if(boardCell(i+5*fmove,j+5,n,m) && !isOpponent(board,i+5*fmove,j+5,solCol) && !isOpponent(board,i+3*fmove,j+3,oppCol))
+					if(boardCell(i+5*fmove,j+5,n,m) && !isOpponent(board,i+5*fmove,j+5,solCol,townCol) && !isOpponent(board,i+3*fmove,j+3,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i+5*fmove,j+5,true);
 						temp.score=eval(temp.board);
@@ -439,7 +438,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i+2*fmove,j+2),mp(i+5*fmove,j+5));
 						child.pb(temp);
 					}
-					if(boardCell(i-2*fmove,j-2,n,m) && !isOpponent(board,i-2*fmove,j-2,solCol) && !isOpponent(board,i-fmove,j-1,oppCol))
+					if(boardCell(i-2*fmove,j-2,n,m) && !isOpponent(board,i-2*fmove,j-2,solCol,townCol) && !isOpponent(board,i-fmove,j-1,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i-2*fmove,j-2,true);
 						temp.score=eval(temp.board);
@@ -447,7 +446,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i,j),mp(i-2*fmove,j-2));
 						child.pb(temp);
 					}
-					if(boardCell(i-3*fmove,j-3,n,m) && !isOpponent(board,i-3*fmove,j-3,solCol) && !isOpponent(board,i-fmove,j-1,oppCol))
+					if(boardCell(i-3*fmove,j-3,n,m) && !isOpponent(board,i-3*fmove,j-3,solCol,townCol) && !isOpponent(board,i-fmove,j-1,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i-3*fmove,j-3,true);
 						temp.score=eval(temp.board);
@@ -455,7 +454,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j-3));
 						child.pb(temp);
 					}
-					if(boardCell(i-fmove,j-1,n,m) && !isOpponent(board,i-fmove,j-1,solCol) && !isOpponent(board,i-fmove,j-1,oppCol))
+					if(boardCell(i-fmove,j-1,n,m) && !isOpponent(board,i-fmove,j-1,solCol,townCol) && !isOpponent(board,i-fmove,j-1,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i+2*fmove,j+2,i-fmove,j-1,false);
 						temp.score=eval(temp.board);
@@ -463,7 +462,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i+2*fmove,j+2),mp(i-fmove,j-1));
 						child.pb(temp);
 					}
-					if(boardCell(i+3*fmove,j+3,n,m) && !isOpponent(board,i+3*fmove,j+3,solCol) && !isOpponent(board,i+3*fmove,j+3,oppCol))
+					if(boardCell(i+3*fmove,j+3,n,m) && !isOpponent(board,i+3*fmove,j+3,solCol,townCol) && !isOpponent(board,i+3*fmove,j+3,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i+3*fmove,j+3,false);
 						temp.score=eval(temp.board);
@@ -476,7 +475,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 				/*Left Diagonal Cannon*/
 				if(isCannon(board,i,j,i+fmove,j-1,i+2*fmove,j-2,solCol))
 				{
-					if(boardCell(i+4*fmove,j-4,n,m) && !isOpponent(board,i+4*fmove,j-4,solCol) && !isOpponent(board,i+3*fmove,j-3,oppCol))
+					if(boardCell(i+4*fmove,j-4,n,m) && !isOpponent(board,i+4*fmove,j-4,solCol,townCol) && !isOpponent(board,i+3*fmove,j-3,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i+4*fmove,j-4,true);
 						temp.score=eval(temp.board);
@@ -484,7 +483,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i+2*fmove,j-2),mp(i+4*fmove,j-4));
 						child.pb(temp);
 					}
-					if(boardCell(i+5*fmove,j-5,n,m) && !isOpponent(board,i+5*fmove,j-5,solCol) && !isOpponent(board,i+3*fmove,j-3,oppCol))
+					if(boardCell(i+5*fmove,j-5,n,m) && !isOpponent(board,i+5*fmove,j-5,solCol,townCol) && !isOpponent(board,i+3	*fmove,j-3,oppCol,solCol))
 					{ 
 						temp.board=changeBoard(board,i,j,i+5*fmove,j-5,true);
 						temp.score=eval(temp.board);
@@ -492,7 +491,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i+2*fmove,j-2),mp(i+5*fmove,j-5));
 						child.pb(temp);
 					}
-					if(boardCell(i-2*fmove,j+2,n,m) && !isOpponent(board,i-2*fmove,j+2,solCol) && !isOpponent(board,i-fmove,j+1,oppCol))
+					if(boardCell(i-2*fmove,j+2,n,m) && !isOpponent(board,i-2*fmove,j+2,solCol,townCol) && !isOpponent(board,i-fmove,j+1,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i-2*fmove,j+2,true);
 						temp.score=eval(temp.board);
@@ -500,7 +499,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i,j),mp(i-2*fmove,j+2));
 						child.pb(temp);
 					}
-					if(boardCell(i-3*fmove,j+3,n,m) && !isOpponent(board,i-3*fmove,j+3,solCol) && !isOpponent(board,i-fmove,j+1,oppCol))
+					if(boardCell(i-3*fmove,j+3,n,m) && !isOpponent(board,i-3*fmove,j+3,solCol,townCol) && !isOpponent(board,i-fmove,j+1,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i-3*fmove,j+3,true);
 						temp.score=eval(temp.board);
@@ -508,7 +507,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j+3));
 						child.pb(temp);
 					}
-					if(boardCell(i-fmove,j+1,n,m) && !isOpponent(board,i-fmove,j+1,solCol) && !isOpponent(board,i-fmove,j+1,oppCol))
+					if(boardCell(i-fmove,j+1,n,m) && !isOpponent(board,i-fmove,j+1,solCol,townCol) && !isOpponent(board,i-fmove,j+1,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i+2*fmove,j-2,i-fmove,j+1,false);
 						temp.score=eval(temp.board);
@@ -516,7 +515,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i+2*fmove,j-2),mp(i-fmove,j+1));
 						child.pb(temp);
 					}
-					if(boardCell(i+3*fmove,j-3,n,m) && !isOpponent(board,i+3*fmove,j-3,solCol) && !isOpponent(board,i+3*fmove,j-3,oppCol))
+					if(boardCell(i+3*fmove,j-3,n,m) && !isOpponent(board,i+3*fmove,j-3,solCol,townCol) && !isOpponent(board,i+3*fmove,j-3,oppCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i+3*fmove,j-3,false);
 						temp.score=eval(temp.board);
@@ -554,6 +553,7 @@ pair<pair<double,bool>,pair<pii,pii> > miniMaxWithAlphaBetaPruning(node &root, i
 {
 	if(depth==maxDepth)
 		return mp(mp(eval(root.board),false),mp(mp(0,0),mp(0,0)));
+
 	// cerr<<"dephth --- "<<depth<<endl;
 	if(depth&1)
 	{
@@ -589,7 +589,7 @@ pair<pair<double,bool>,pair<pii,pii> > miniMaxWithAlphaBetaPruning(node &root, i
 			}
 		}
 
-		return mp(mp(beta,newBoard.isCannonMove),newBoard.changeCoordi);
+		return mp(mp(alpha,newBoard.isCannonMove),newBoard.changeCoordi);
 	}
 }
 
@@ -601,7 +601,7 @@ string ErnestMove(vector<vector<int> > &board)
 	makeTree(root,0);
 
 	pair<pair<double,bool>,pair<pii,pii> > ans=miniMaxWithAlphaBetaPruning(root,0,-inf,inf);
-	cerr<<"HI"<<endl;
+	cerr<<setprecision(9)<<fixed<<(ans.fi.fi)<<endl;
 	pair<pii,pii> move=ans.sec;
 
 	if(!ans.fi.sec)
