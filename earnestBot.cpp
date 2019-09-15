@@ -85,6 +85,7 @@ vector<vector<int> > changeBoard(vector<vector<int> > board, int a, int b, int c
 	}
 	board[c][d]=board[a][b];
 	board[a][b]=empBlock;
+	
 	return board;
 }
 
@@ -269,6 +270,13 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 		fmove=1,bmove=-2;
 	else
 		fmove=-1,bmove=2;
+
+	/*for(int i=0;i<n;i++)
+	{
+		for(int j=0;j<m;j++)
+			cerr<<board[i][j]<<" ";
+		cerr<<endl;
+	}*/
 
 	for(int i=0;i<n;i++)
 	{
@@ -512,9 +520,13 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						child.pb(temp);
 					}
 				}
+			cerr<<board[i][j]<<" "<<i<<" "<<j<<endl;
 			}
 		}
+		// cerr<<endl;
 	}
+
+	// cerr<<"branches made"<<endl;
 }
 
 void makeTree(node &root, int depth)
@@ -522,11 +534,13 @@ void makeTree(node &root, int depth)
 	if(depth>=maxDepth)
 		return;
 
+	// cerr<<root.child.size()<<" hibranches --- "<<depth<<endl;
 	allBranches(root.child, root.board);
-
 	for(int i=0;i<root.child.size();i++)
 	{
+		cerr<<depth<<" ---- start "<<i<<endl;
 		makeTree(root.child[i],depth+1);
+		// cerr<<depth<<" ---- done "<<i<<endl;
 	}
 }
 
@@ -534,7 +548,7 @@ pair<pair<double,bool>,pair<pii,pii> > miniMaxWithAlphaBetaPruning(node &root, i
 {
 	if(depth==maxDepth)
 		return mp(mp(eval(root.board),false),mp(mp(0,0),mp(0,0)));
-
+	cerr<<"dephth --- "<<depth<<endl;
 	if(depth&1)
 	{
 		node newBoard;
@@ -581,24 +595,13 @@ string ErnestMove(vector<vector<int> > &board)
 	makeTree(root,0);
 
 	pair<pair<double,bool>,pair<pii,pii> > ans=miniMaxWithAlphaBetaPruning(root,0,-inf,inf);
-	// cerr<<"HI"<<endl;
+	cerr<<"HI"<<endl;
 	pair<pii,pii> move=ans.sec;
 
-	stringstream x1,x2,x3,x4;
-	x1<<move.fi.fi;
-	x2<<move.fi.sec;
-	x3<<move.sec.fi;
-	x4<<move.sec.sec;
-	string s1,s2,s3,s4;
-	x1>>s1;
-	x2>>s2;
-	x3>>s3;
-	x4>>s4;
-
 	if(!ans.fi.sec)
-		return ("S "+s1+ " "+ s2+" M "+s3+" "+s4);
+		return ("S "+ to_string(move.fi.sec)+" "+to_string(move.fi.fi)+" M "+to_string(move.sec.sec)+" "+to_string(move.sec.fi));
 	else
-		return ("S "+s1+ " "+ s2+" B "+s3+" "+s4);
+		return ("S "+to_string(move.fi.sec)+ " "+ to_string(move.fi.fi)+" B "+to_string(move.sec.sec)+" "+to_string(move.sec.fi));
 }
 
 int main(){
@@ -634,7 +637,7 @@ int main(){
 		ss<<str;
 		int x1,x2,x3,x4;
 		ss>>x1;ss>>x2;ss>>x3;ss>>x4;
-		Board = changeBoard(Board,x1,x2,x3,x4,0);
+		Board = changeBoard(Board,x2,x1,x4,x3,0);
 	}
 
 	while(true)
@@ -650,9 +653,9 @@ int main(){
 		// ss>>x1>>x2>>temp>>x3>>x4;
 		// cout<<"S 1 2 M 1 3"<<endl;
 		if(t[3]=='M')
-			Board = changeBoard(Board,(t[1]-'0'),(t[2]-'0'),(t[4]-'0'),(t[5]-'0'),0);
+			Board = changeBoard(Board,(t[2]-'0'),(t[1]-'0'),(t[5]-'0'),(t[4]-'0'),0);
 		else
-			Board = changeBoard(Board,(t[1]-'0'),(t[2]-'0'),(t[4]-'0'),(t[5]-'0'),1);
+			Board = changeBoard(Board,(t[2]-'0'),(t[1]-'0'),(t[5]-'0'),(t[4]-'0'),1);
 		// cerr<<"Hello"<<endl;
 
 		/*if(isGameOver(Board, townCol, n, m))	{
@@ -666,13 +669,21 @@ int main(){
 		str = ErnestMove(Board) ;
 		// stringstream sss;
 		// sss<<str;
+		if(str[6]=='M')
+			Board = changeBoard(Board,str[4]-'0',str[2]-'0',str[10]-'0',str[8]-'0',0);	
+		else
+			Board = changeBoard(Board,str[4]-'0',str[2]-'0',str[10]-'0',str[8]-'0',1);	
+		for(int i=0;i<Board.size();i++)
+		{
+			for(int j=0;j<Board[0].size();j++)
+				cerr<<Board[i][j]<<" ";
+			cerr<<endl;
+		}
+		cerr<< str<<endl;
 		cout << str<<endl;
 		// sss>>x1>>x2>>x3>>x4;
 		// cout<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<endl;
-		if(str[3]=='M')
-			Board = changeBoard(Board,str[1]-'0',str[2]-'0',str[4]-'0',str[5]-'0',0);	
-		else
-			Board = changeBoard(Board,str[1]-'0',str[2]-'0',str[4]-'0',str[5]-'0',1);	
+
 
 		/*if(isGameOver(Board, townCol, n, m))	{
 			pair<float,float> scores = finalScore(Board,solCol);
