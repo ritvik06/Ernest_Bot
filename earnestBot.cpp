@@ -214,10 +214,20 @@ double eval(vector<vector<int> > &board)
 	}
 	
 	double func=posAttk - posOppAttk + 80*posCannAttk - 50*posOppCannAttk + 100*posAttkOnTH - posOppAttkOnTH 
-				+ numOfTH + 150*(4-numOfOppTH) + 30*loc - 30*locOpp + 80*(8-numOfOppSol);
+				+ numOfTH + 1000*(4-numOfOppTH) + 30*loc - 30*locOpp + 80*(8-numOfOppSol);
 	// double func=30*(numOfSol)-30*(posOppAttk)+100*posAttkOnTH+30*(8-numOfOppSol)+100*(4-numOfOppTH)+(20*numOfTH)+30*loc-30*locOpp;
 
 	return func;
+}
+
+void printBoard(vector<vector<int> > &board)
+{
+	for(int i=0;i<board.size();i++)
+	{
+		for(int j=0;j<board[0].size();j++)
+			cerr<<board[i][j]<<" ";
+		cerr<<endl;
+	}
 }
 
 void allBranches(vector<node> &child, vector<vector<int> > &board)
@@ -316,7 +326,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.isCannonMove=false;
 						child.pb(temp);
 					}
-					if(boardCell(i+bmove,j+2,n,m) && !isOpponent(board,i+fmove,j+2,solCol,solCol))
+					if(boardCell(i+bmove,j+2,n,m) && !isOpponent(board,i+bmove,j+2,solCol,solCol))
 					{
 						temp.board=changeBoard(board,i,j,i+bmove,j+2,false);
 						temp.score=eval(temp.board);
@@ -362,7 +372,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j));
 						child.pb(temp);
 					}
-					if(boardCell(i-fmove,j,n,m) && !isOpponent(board,i-fmove,j,solCol,townCol) && !isOpponent(board,i-fmove,j,oppCol,solCol))
+					if(boardCell(i-fmove,j,n,m) && isOpponent(board,i-fmove,j,empBlock,empBlock))
 					{
 						temp.board=changeBoard(board,i+2*fmove,j,i-fmove,j,false);
 						temp.score=eval(temp.board);
@@ -370,7 +380,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i+2*fmove,j),mp(i-fmove,j));
 						child.pb(temp);
 					}
-					if(boardCell(i+3*fmove,j,n,m) && !isOpponent(board,i+3*fmove,j,solCol,townCol) && !isOpponent(board,i+3*fmove,j,oppCol,solCol))
+					if(boardCell(i+3*fmove,j,n,m) && isOpponent(board,i+3*fmove,j,empBlock,empBlock))
 					{
 						temp.board=changeBoard(board,i,j,i+3*fmove,j,false);
 						temp.score=eval(temp.board);
@@ -415,7 +425,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j-3));
 						child.pb(temp);
 					}
-					if(boardCell(i-fmove,j-1,n,m) && !isOpponent(board,i-fmove,j-1,solCol,townCol) && !isOpponent(board,i-fmove,j-1,oppCol,solCol))
+					if(boardCell(i-fmove,j-1,n,m) && isOpponent(board,i-fmove,j-1,empBlock,empBlock))
 					{
 						temp.board=changeBoard(board,i+2*fmove,j+2,i-fmove,j-1,false);
 						temp.score=eval(temp.board);
@@ -423,7 +433,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i+2*fmove,j+2),mp(i-fmove,j-1));
 						child.pb(temp);
 					}
-					if(boardCell(i+3*fmove,j+3,n,m) && !isOpponent(board,i+3*fmove,j+3,solCol,townCol) && !isOpponent(board,i+3*fmove,j+3,oppCol,solCol))
+					if(boardCell(i+3*fmove,j+3,n,m) && isOpponent(board,i+3*fmove,j+3,empBlock,empBlock))
 					{
 						temp.board=changeBoard(board,i,j,i+3*fmove,j+3,false);
 						temp.score=eval(temp.board);
@@ -468,7 +478,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j+3));
 						child.pb(temp);
 					}
-					if(boardCell(i-fmove,j+1,n,m) && !isOpponent(board,i-fmove,j+1,solCol,townCol) && !isOpponent(board,i-fmove,j+1,oppCol,solCol))
+					if(boardCell(i-fmove,j+1,n,m) && isOpponent(board,i-fmove,j+1,empBlock,empBlock))
 					{
 						temp.board=changeBoard(board,i+2*fmove,j-2,i-fmove,j+1,false);
 						temp.score=eval(temp.board);
@@ -476,7 +486,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i+2*fmove,j-2),mp(i-fmove,j+1));
 						child.pb(temp);
 					}
-					if(boardCell(i+3*fmove,j-3,n,m) && !isOpponent(board,i+3*fmove,j-3,solCol,townCol) && !isOpponent(board,i+3*fmove,j-3,oppCol,solCol))
+					if(boardCell(i+3*fmove,j-3,n,m) && isOpponent(board,i+3*fmove,j-3,empBlock,empBlock))
 					{
 						temp.board=changeBoard(board,i,j,i+3*fmove,j-3,false);
 						temp.score=eval(temp.board);
@@ -558,11 +568,11 @@ string ErnestMove(vector<vector<int> > &board)
 {
 	node root;
 	root.board=board;
-	// cerr<<"Hello2"<<endl;
+	
 	makeTree(root,0);
 
 	pair<pair<double,bool>,pair<pii,pii> > ans=miniMaxWithAlphaBetaPruning(root,0,-inf,inf);
-	cerr<<setprecision(9)<<fixed<<(ans.fi.fi)<<endl;
+	// cerr<<setprecision(9)<<fixed<<(ans.fi.fi)<<endl;
 	pair<pii,pii> move=ans.sec;
 
 	if(!ans.fi.sec)
@@ -598,8 +608,7 @@ int main(){
 		string str = ErnestMove(Board) ;
 		cout << str<<endl;
 		cerr<<str<<endl;
-		// stringstream sss;
-		// sss<<str;
+		
 		if(str[6]=='M')
 			Board = changeBoard(Board,str[4]-'0',str[2]-'0',str[10]-'0',str[8]-'0',0);	
 		else
@@ -611,45 +620,22 @@ int main(){
 		string str;
 		char t[6];
 		cin>>t[0]>>t[1]>>t[2]>>t[3]>>t[4]>>t[5];
-		// getline(cin,str);
-		// stringstream ss;
-		// ss<<str;
-		// string temp;
-		// ss>>temp;
-		// ss>>x1>>x2>>temp>>x3>>x4;
-		// cout<<"S 1 2 M 1 3"<<endl;
+		
 		if(t[3]=='M')
 			Board = changeBoard(Board,(t[2]-'0'),(t[1]-'0'),(t[5]-'0'),(t[4]-'0'),0);
 		else
 			Board = changeBoard(Board,(t[2]-'0'),(t[1]-'0'),(t[5]-'0'),(t[4]-'0'),1);
-		
+		cerr<<"START\n";
+		printBoard(Board);
 		str = ErnestMove(Board) ;
 		cout << str<<endl;
-		cerr<<str<<endl;
-		// stringstream sss;
-		// sss<<str;
+		cerr<<"Move "<<str<<endl;
+		printBoard(Board);
+		
 		if(str[6]=='M')
 			Board = changeBoard(Board,str[4]-'0',str[2]-'0',str[10]-'0',str[8]-'0',0);	
 		else
 			Board = changeBoard(Board,str[4]-'0',str[2]-'0',str[10]-'0',str[8]-'0',1);	
-		/*for(int i=0;i<Board.size();i++)
-		{
-			for(int j=0;j<Board[0].size();j++)
-				cerr<<Board[i][j]<<" ";
-			cerr<<endl;
-		}
-		cerr<< str<<endl;*/
-		// sss>>x1>>x2>>x3>>x4;
-		// cout<<x1<<" "<<x2<<" "<<x3<<" "<<x4<<endl;
-
-
-		/*if(isGameOver(Board, townCol, n, m))	{
-			pair<float,float> scores = finalScore(Board,solCol);
-			// cout << "My score " << scores.fi << endl;
-			// cout << "opponents score " << scores.sec << endl;
-			break;
-		}*/
-
 	}
 
 	return 0;
