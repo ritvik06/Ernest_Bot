@@ -6,6 +6,7 @@ using namespace std;
 #define fi first
 #define sec second
 #define pb push_back
+#define LOC 4
 
 /*
 0--empty block
@@ -194,6 +195,20 @@ pair<float,float> finalScore(vector<vector<int> > &board, int solCol)
 	return (mp(myScore,OppScore));
 }
 
+bool retLoc(int i,int row, int col)
+{
+	if(col==whiteSol && i>=row)
+	{
+		return true;
+	}
+	else if(col==blackSol && i<=row)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 /*evaluation function consists of next move attacks :-
 1. No of my team soldiers
 2. No of my team Cannon's that can attack
@@ -212,7 +227,9 @@ double eval(vector<vector<int> > &board)
 	else
 		fmove=-1,bmove=2;
 
-	int numOfSol=0,posCannonAttk=0,posOppAttk=0,posOppAttkOnTH=0,posAttkOnTH;
+	int numOfSol=0,posCannonAttk=0,posOppAttk=0,posAttk=0,posOppAttkOnTH=0,posAttkOnTH,numOfOppSol=0;
+	int numOfTH=0,numOfOppTH=0;
+	int loc=0,locOpp=0;
 
 	for(int i=0;i<n;i++)
 	{
@@ -220,6 +237,15 @@ double eval(vector<vector<int> > &board)
 		{
 			if(board[i][j]==solCol)
 				numOfSol++;
+			if(board[i][j]==oppCol)
+				numOfOppSol++;
+			if(board[i][j]==townCol)
+				numOfTH++;
+			if(board[i][j]==oppTownCol)
+				numOfOppTH++;
+
+			if(retLoc(i,LOC,solCol) && board[i][j]==solCol) loc++;
+			if(retLoc(i,LOC,oppCol) && board[i][j]==oppCol) locOpp++;
 
 			if(board[i][j]==townCol)
 			{
@@ -251,10 +277,8 @@ double eval(vector<vector<int> > &board)
 			}
 		}
 	}
-	// cerr<<numOfSol<<endl;
-	// Assign weights later
-	double func=(numOfSol)-(posOppAttk)+100*posAttkOnTH;
-
+	
+	double func=30*(numOfSol)-30*(posOppAttk)+100*posAttkOnTH+30*(8-numOfOppSol)+100*(4-numOfOppTH)+(20*numOfTH)+30*loc-30*locOpp;
 
 	return func;
 }
@@ -635,15 +659,14 @@ int main(){
 	if(player_id==1)
 	{
 		string str = ErnestMove(Board) ;
-		// cout << "S 7 7 M 4 2";
 		cout << str<<endl;
-		// cerr << "Moved";
-		// string str= "S 7 7 M 4 2";
-		stringstream ss;
-		ss<<str;
-		int x1,x2,x3,x4;
-		ss>>x1;ss>>x2;ss>>x3;ss>>x4;
-		Board = changeBoard(Board,x2,x1,x4,x3,0);
+		cerr<<str<<endl;
+		// stringstream sss;
+		// sss<<str;
+		if(str[6]=='M')
+			Board = changeBoard(Board,str[4]-'0',str[2]-'0',str[10]-'0',str[8]-'0',0);	
+		else
+			Board = changeBoard(Board,str[4]-'0',str[2]-'0',str[10]-'0',str[8]-'0',1);	
 	}
 
 	while(true)
@@ -662,16 +685,7 @@ int main(){
 			Board = changeBoard(Board,(t[2]-'0'),(t[1]-'0'),(t[5]-'0'),(t[4]-'0'),0);
 		else
 			Board = changeBoard(Board,(t[2]-'0'),(t[1]-'0'),(t[5]-'0'),(t[4]-'0'),1);
-		// cerr<<"Hello"<<endl;
-
-		/*if(isGameOver(Board, townCol, n, m))	{
-			pair<float,float> scores = finalScore(Board,solCol);
-			// cout << "My score " << scores.fi << endl;
-			// cout << "opponents score " << scores.sec << endl;
-			break;
-		}*/
-
-		// int x1,x2,x3,x4;
+		
 		str = ErnestMove(Board) ;
 		cout << str<<endl;
 		cerr<<str<<endl;
