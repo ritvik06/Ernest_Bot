@@ -215,8 +215,7 @@ double eval(vector<vector<int> > &board)
 	
 	double func=posAttk - 30000*posOppAttk + 80*posCannAttk - 50*posOppCannAttk + 100*posAttkOnTH - 100*posOppAttkOnTH 
 				+ numOfTH + 100000*(4-numOfOppTH) /*+ 30*loc */- 60000*locOpp + 800*(12-numOfOppSol);
-	// double func=30*(numOfSol)-30*(posOppAttk)+100*posAttkOnTH+30*(8-numOfOppSol)+100*(4-numOfOppTH)+(20*numOfTH)+30*loc-30*locOpp;
-
+	
 	return func;
 }
 
@@ -240,13 +239,6 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 		fmove=1,bmove=-2;
 	else
 		fmove=-1,bmove=2;
-
-	/*for(int i=0;i<n;i++)
-	{
-		for(int j=0;j<m;j++)
-			cerr<<board[i][j]<<" ";
-		cerr<<endl;
-	}*/
 
 	for(int i=0;i<n;i++)
 	{
@@ -286,25 +278,21 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 				bool isSideMovePossible=false;
 				if(isSoldier(i,j+1,n,m,oppCol,oppTownCol,board))
 				{
-					// cerr<<"started -- "<<i<<" "<<j<<endl;
 					temp.board=changeBoard(board,i,j,i,j+1,false);
 					temp.score=eval(temp.board);
 					temp.changeCoordi=mp(mp(i,j),mp(i,j+1));
 					temp.isCannonMove=false;
 					child.pb(temp);
 					isSideMovePossible=true;
-					// cerr<<"ended -- "<<i<<" "<<j<<endl;
 				}
 				if(isSoldier(i,j-1,n,m,oppCol,oppTownCol,board))
 				{
-					// cerr<<"started -- "<<i<<" "<<j<<endl;
 					temp.board=changeBoard(board,i,j,i,j-1,false);
 					temp.score=eval(temp.board);
 					temp.changeCoordi=mp(mp(i,j),mp(i,j-1));
 					temp.isCannonMove=false;
 					child.pb(temp);
 					isSideMovePossible=true;
-					// cerr<<"ended -- "<<i<<" "<<j<<endl;
 				}
 
 				/*Backward Moves*/
@@ -497,12 +485,8 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 				}
 			
 			}
-			// cerr<<board[i][j]<<" "<<i<<" "<<j<<endl;
 		}
-		// cerr<<endl;
 	}
-
-	// cerr<<"branches made"<<endl;
 }
 
 void makeTree(node &root, int depth)
@@ -611,7 +595,6 @@ int main(){
 	{
 		string str = ErnestMove(Board) ;
 		cout << str<<endl;
-		cerr<<str<<endl;
 		
 		if(str[6]=='M')
 			Board = changeBoard(Board,str[4]-'0',str[2]-'0',str[10]-'0',str[8]-'0',0);	
@@ -629,12 +612,9 @@ int main(){
 			Board = changeBoard(Board,(t[2]-'0'),(t[1]-'0'),(t[5]-'0'),(t[4]-'0'),0);
 		else
 			Board = changeBoard(Board,(t[2]-'0'),(t[1]-'0'),(t[5]-'0'),(t[4]-'0'),1);
-		cerr<<"START\n";
-		printBoard(Board);
+		
 		str = ErnestMove(Board) ;
 		cout << str<<endl;
-		cerr<<"Move "<<str<<endl;
-		printBoard(Board);
 		
 		if(str[6]=='M')
 			Board = changeBoard(Board,str[4]-'0',str[2]-'0',str[10]-'0',str[8]-'0',0);	
