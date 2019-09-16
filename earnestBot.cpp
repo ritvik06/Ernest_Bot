@@ -103,98 +103,6 @@ bool isCannon(vector<vector<int> > &board,int a1,int b1,int a2,int b2,int a3,int
 	return true;
 }
 
-pair<int,int> count_towns(vector<vector<int> > &board, int townCol,int n,int m)
-{
-	int count=0,opp_count=0;
-
-		for(int i=0;i<4;i++){
-			if(townCol==3){
-				if(board[0][2*i]==3) count++;
-				if(board[n-1][2*i+1]==4) opp_count++;
-
-			}
-			else if(townCol==4){
-				if(board[n-1][2*i+1]==4) count++;	
-				if(board[0][2*i]==3) opp_count++;
-			}
-		}
-
-	return mp(count,opp_count);	
-}
-
-bool isGameOver(vector<vector<int> > &board,int townCol, int n, int m)
-{
-	pair<int, int> counts = count_towns(board,townCol,n,m);
-	int my_count = counts.fi;
-	int opp_count = counts.sec;
-
-	if(my_count<=2 || opp_count<=2){
-		return true;
-	}
-
-	return false;
-}
-
-bool isWinner(vector<vector<int> > &board,int townCol, int n, int m)
-{
-	pair<int, int> counts = count_towns(board,townCol,n,m);
-	int my_count = counts.fi;
-	int opp_count = counts.sec;
-
-	if(my_count==2) return false;
-	else return true;
-
-	return true;
-}
-
-float town_hall_score(int myHalls,int oppHalls)
-{
-	if(myHalls==4){
-		if(oppHalls==2) return 10;
-		else if(oppHalls==3) return 7;
-		else if (oppHalls==4) return 5;
-	}
-	else if(myHalls==3){
-		if(oppHalls==2) return 8;
-		else if(oppHalls==3) return 5;
-		else if (oppHalls==4) return 3;		
-	}
-
-	else if(myHalls==2){
-		if(oppHalls==3) return 2;
-		else if (oppHalls==4) return 0;
-	}
-
-	return 0;
-
-}
-
-pair<float,float> finalScore(vector<vector<int> > &board, int solCol)
-{
-	int mySol=0,oppSol=0;
-	int n=board.size(),m=board[0].size();
-
-	for(int i=0;i<n;i++){
-		for(int j=0;j<m;j++){
-			if(isSoldier(i,j,board.size(),board[0].size(),solCol,solCol+2,board)) mySol++;
-			else if (isSoldier(i,j,board.size(),board[0].size(),solCol,solCol+2,board)) oppSol++;
-		}
-	}
-
-	float mySolCount = mySol/100;
-	float oppSolCount = oppSol/100;
-
-	pair<int, int> counts = count_towns(board,solCol+2,board.size(),board[0].size());
-	int my_count = counts.fi;
-	int opp_count = counts.sec;
-
-	float myScore = (town_hall_score(my_count,opp_count)) + mySolCount;
-	float OppScore = (town_hall_score(opp_count,my_count)) + oppSolCount;
-
-
-	return (mp(myScore,OppScore));
-}
-
 bool retLoc(int i,int row, int col)
 {
 	if(col==whiteSol && i>=row)
@@ -227,8 +135,8 @@ double eval(vector<vector<int> > &board)
 	else
 		fmove=-1,bmove=2;
 
-	int numOfSol=0,posCannonAttk=0,posOppAttk=0,posAttk=0,posOppAttkOnTH=0,posAttkOnTH,numOfOppSol=0;
-	int numOfTH=0,numOfOppTH=0;
+	int numOfSol=0,posAttk=0,posOppAttk=0,posOppAttkOnTH=0,posAttkOnTH=0,numOfOppSol=0;
+	int numOfTH=0,numOfOppTH=0,posCannAttk=0,posOppCannAttk=0;
 	int loc=0,locOpp=0;
 
 	for(int i=0;i<n;i++)
@@ -253,8 +161,11 @@ double eval(vector<vector<int> > &board)
 				if(boardCell(i+fmove,j+1,n,m) && isOpponent(board,i+fmove,j+1,oppCol,oppCol)) posOppAttkOnTH++;
 				if(boardCell(i+fmove,j-1,n,m) && isOpponent(board,i+fmove,j-1,oppCol,oppCol)) posOppAttkOnTH++;
 				if(isCannon(board,i+2*fmove,j,i+3*fmove,j,i+4*fmove,j,oppCol)) posOppAttkOnTH++;
+				if(isCannon(board,i+5*fmove,j,i+3*fmove,j,i+4*fmove,j,oppCol)) posOppAttkOnTH++;
 				if(isCannon(board,i+2*fmove,j-2,i+3*fmove,j-3,i+4*fmove,j-4,oppCol)) posOppAttkOnTH++;
+				if(isCannon(board,i+5*fmove,j-5,i+3*fmove,j-3,i+4*fmove,j-4,oppCol)) posOppAttkOnTH++;
 				if(isCannon(board,i+2*fmove,j+2,i+3*fmove,j+3,i+4*fmove,j+4,oppCol)) posOppAttkOnTH++;
+				if(isCannon(board,i+5*fmove,j+5,i+3*fmove,j+3,i+4*fmove,j+4,oppCol)) posOppAttkOnTH++;
 			}
 
 			if(board[i][j]==oppTownCol)
@@ -263,22 +174,48 @@ double eval(vector<vector<int> > &board)
 				if(boardCell(i-fmove,j+1,n,m) && isOpponent(board,i-fmove,j+1,solCol,solCol)) posAttkOnTH++;
 				if(boardCell(i-fmove,j-1,n,m) && isOpponent(board,i-fmove,j-1,solCol,solCol)) posAttkOnTH++;
 				if(isCannon(board,i-2*fmove,j,i-3*fmove,j,i-4*fmove,j,solCol)) posOppAttkOnTH++;
+				if(isCannon(board,i-5*fmove,j,i-3*fmove,j,i-4*fmove,j,solCol)) posOppAttkOnTH++;
 				if(isCannon(board,i-2*fmove,j-2,i-3*fmove,j-3,i-4*fmove,j-4,solCol)) posOppAttkOnTH++;
+				if(isCannon(board,i-5*fmove,j-5,i-3*fmove,j-3,i-4*fmove,j-4,solCol)) posOppAttkOnTH++;
 				if(isCannon(board,i-2*fmove,j+2,i-3*fmove,j+3,i-4*fmove,j+4,solCol)) posOppAttkOnTH++;
+				if(isCannon(board,i-5*fmove,j+5,i-3*fmove,j+3,i-4*fmove,j+4,solCol)) posOppAttkOnTH++;
 			}
 
 			if(board[i][j]==solCol)
 			{
-				if(boardCell(i+fmove,j,n,m) && isOpponent(board,i+fmove,j,oppCol,oppCol)) posOppAttk++;
-				if(boardCell(i+fmove,j+1,n,m) && isOpponent(board,i+fmove,j+1,oppCol,oppCol)) posOppAttk++;
-				if(boardCell(i+fmove,j-1,n,m) && isOpponent(board,i+fmove,j-1,oppCol,oppCol)) posOppAttk++;
-				if(boardCell(i,j+1,n,m) && isOpponent(board,i,j+1,oppCol,oppCol)) posOppAttk++;
-				if(boardCell(i,j-1,n,m) && isOpponent(board,i,j-1,oppCol,oppCol)) posOppAttk++;
+				if(boardCell(i+fmove,j,n,m) && isOpponent(board,i+fmove,j,oppCol,oppCol)) posAttk++;
+				if(boardCell(i+fmove,j+1,n,m) && isOpponent(board,i+fmove,j+1,oppCol,oppCol)) posAttk++;
+				if(boardCell(i+fmove,j-1,n,m) && isOpponent(board,i+fmove,j-1,oppCol,oppCol)) posAttk++;
+				if(boardCell(i,j+1,n,m) && isOpponent(board,i,j+1,oppCol,oppCol)) posAttk++;
+				if(boardCell(i,j-1,n,m) && isOpponent(board,i,j-1,oppCol,oppCol)) posAttk++;
+				if(isCannon(board,i+2*fmove,j,i+3*fmove,j,i+4*fmove,j,oppCol)) posOppCannAttk++;/*Straight 2*/
+				if(isCannon(board,i+5*fmove,j,i+3*fmove,j,i+4*fmove,j,oppCol)) posOppCannAttk++;
+				if(isCannon(board,i+2*fmove,j-2,i+3*fmove,j-3,i+4*fmove,j-4,oppCol)) posOppCannAttk++;
+				if(isCannon(board,i+5*fmove,j-5,i+3*fmove,j-3,i+4*fmove,j-4,oppCol)) posOppCannAttk++;
+				if(isCannon(board,i+5*fmove,j+5,i+3*fmove,j+3,i+4*fmove,j+4,oppCol)) posOppCannAttk++;
+				if(isCannon(board,i+2*fmove,j+2,i+3*fmove,j+3,i+4*fmove,j+4,oppCol)) posOppCannAttk++;
+			}
+
+			if(board[i][j]==oppCol)
+			{
+				if(boardCell(i-fmove,j,n,m) && isOpponent(board,i-fmove,j,solCol,solCol)) posOppAttk++;
+				if(boardCell(i-fmove,j+1,n,m) && isOpponent(board,i-fmove,j+1,solCol,solCol)) posOppAttk++;
+				if(boardCell(i-fmove,j-1,n,m) && isOpponent(board,i-fmove,j-1,solCol,solCol)) posOppAttk++;
+				if(boardCell(i,j+1,n,m) && isOpponent(board,i,j+1,solCol,solCol)) posOppAttk++;
+				if(boardCell(i,j-1,n,m) && isOpponent(board,i,j-1,solCol,solCol)) posOppAttk++;
+				if(isCannon(board,i-2*fmove,j,i-3*fmove,j,i-4*fmove,j,solCol)) posCannAttk++;/*Straight 2*/
+				if(isCannon(board,i-5*fmove,j,i-3*fmove,j,i-4*fmove,j,solCol)) posCannAttk++;
+				if(isCannon(board,i-2*fmove,j-2,i-3*fmove,j-3,i-4*fmove,j-4,solCol)) posCannAttk++;
+				if(isCannon(board,i-5*fmove,j-5,i-3*fmove,j-3,i-4*fmove,j-4,solCol)) posCannAttk++;
+				if(isCannon(board,i-5*fmove,j+5,i-3*fmove,j+3,i-4*fmove,j+4,solCol)) posCannAttk++;
+				if(isCannon(board,i-2*fmove,j+2,i-3*fmove,j+3,i-4*fmove,j+4,solCol)) posCannAttk++;
 			}
 		}
 	}
 	
-	double func=30*(numOfSol)-30*(posOppAttk)+100*posAttkOnTH+30*(8-numOfOppSol)+100*(4-numOfOppTH)+(20*numOfTH)+30*loc-30*locOpp;
+	double func=posAttk - posOppAttk + 80*posCannAttk - 50*posOppCannAttk + 100*posAttkOnTH - posOppAttkOnTH 
+				+ numOfTH + 150*(4-numOfOppTH) + 30*loc - 30*locOpp + 80*(8-numOfOppSol);
+	// double func=30*(numOfSol)-30*(posOppAttk)+100*posAttkOnTH+30*(8-numOfOppSol)+100*(4-numOfOppTH)+(20*numOfTH)+30*loc-30*locOpp;
 
 	return func;
 }
