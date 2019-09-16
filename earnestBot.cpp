@@ -20,7 +20,7 @@ move -- S a b M c d || S a b B c d
 */
 int empBlock=0, whiteSol=1, blackSol=2, whiteTown=3, blackTown=4;
 int solCol,oppCol,oppTownCol,townCol;
-int maxDepth=3;/*MiniMax made for maxDepth*/
+int maxDepthTree=3;/*MiniMax made for maxDepth*/
 int timelimit;	
 int numofCannons;
 
@@ -153,7 +153,7 @@ double eval(vector<vector<int> > &board)
 				numOfOppTH++;
 
 			if(retLoc(i,LOC,solCol) && board[i][j]==solCol) loc++;
-			if(retLoc(i,LOC,oppCol) && board[i][j]==oppCol) locOpp++;
+			if(retLoc(i,LOC-2*fmove,oppCol) && board[i][j]==oppCol) locOpp++;
 
 			if(board[i][j]==townCol)
 			{
@@ -213,8 +213,8 @@ double eval(vector<vector<int> > &board)
 		}
 	}
 	
-	double func=posAttk - posOppAttk + 80*posCannAttk - 50*posOppCannAttk + 100*posAttkOnTH - posOppAttkOnTH 
-				+ numOfTH + 1000*(4-numOfOppTH) + 30*loc - 30*locOpp + 80*(8-numOfOppSol);
+	double func=posAttk - 30000*posOppAttk + 80*posCannAttk - 50*posOppCannAttk + 100*posAttkOnTH - 100*posOppAttkOnTH 
+				+ numOfTH + 100000*(4-numOfOppTH) /*+ 30*loc */- 60000*locOpp + 800*(12-numOfOppSol);
 	// double func=30*(numOfSol)-30*(posOppAttk)+100*posAttkOnTH+30*(8-numOfOppSol)+100*(4-numOfOppTH)+(20*numOfTH)+30*loc-30*locOpp;
 
 	return func;
@@ -507,31 +507,27 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 
 void makeTree(node &root, int depth)
 {
-	if(depth>=maxDepth)
+	if(depth>=maxDepthTree)
 		return;
 
-	// cerr<<root.child.size()<<" hibranches --- "<<depth<<endl;
 	allBranches(root.child, root.board);
 	for(int i=0;i<root.child.size();i++)
 	{
-		// cerr<<depth<<" ---- start "<<i<<endl;
 		makeTree(root.child[i],depth+1);
-		// cerr<<depth<<" ---- done "<<i<<endl;
 	}
 }
 
-pair<pair<double,bool>,pair<pii,pii> > miniMaxWithAlphaBetaPruning(node &root, int depth,int alpha, int beta)
+pair<pair<double,bool>,pair<pii,pii> > miniMaxWithAlphaBetaPruning(node &root, int depth,int alpha, int beta, int maxDepth)
 {
 	if(depth==maxDepth)
 		return mp(mp(eval(root.board),false),mp(mp(0,0),mp(0,0)));
 
-	// cerr<<"dephth --- "<<depth<<endl;
 	if(depth&1)
 	{
 		node newBoard;
 		for(int i=0;i<root.child.size();i++)
 		{
-			double temp = miniMaxWithAlphaBetaPruning(root.child[i],depth+1,alpha,beta).fi.fi;
+			double temp = miniMaxWithAlphaBetaPruning(root.child[i],depth+1,alpha,beta,maxDepth).fi.fi;
 
 			if(temp<=alpha)
 				return mp(mp(temp,root.child[i].isCannonMove),root.child[i].changeCoordi);
@@ -549,7 +545,7 @@ pair<pair<double,bool>,pair<pii,pii> > miniMaxWithAlphaBetaPruning(node &root, i
 		node newBoard;
 		for(int i=0;i<root.child.size();i++)
 		{
-			double temp = miniMaxWithAlphaBetaPruning(root.child[i],depth+1,alpha,beta).fi.fi;
+			double temp = miniMaxWithAlphaBetaPruning(root.child[i],depth+1,alpha,beta,maxDepth).fi.fi;
 
 			if(temp>=beta)
 				return mp(mp(temp,root.child[i].isCannonMove),root.child[i].changeCoordi);
@@ -571,8 +567,16 @@ string ErnestMove(vector<vector<int> > &board)
 	
 	makeTree(root,0);
 
-	pair<pair<double,bool>,pair<pii,pii> > ans=miniMaxWithAlphaBetaPruning(root,0,-inf,inf);
-	// cerr<<setprecision(9)<<fixed<<(ans.fi.fi)<<endl;
+	pair<pair<double,bool>,pair<pii,pii> > ans1=miniMaxWithAlphaBetaPruning(root,0,-inf,inf,1);
+	pair<pair<double,bool>,pair<pii,pii> > ans2=miniMaxWithAlphaBetaPruning(root,0,-inf,inf,2);
+	pair<pair<double,bool>,pair<pii,pii> > ans3=miniMaxWithAlphaBetaPruning(root,0,-inf,inf,3);
+	pair<pair<double,bool>,pair<pii,pii> > ans;
+	
+	if(ans1.fi.fi>ans2.fi.fi) ans=ans1;
+	else ans=ans2;
+
+	if(ans.fi.fi<ans3.fi.fi) ans=ans3;
+
 	pair<pii,pii> move=ans.sec;
 
 	if(!ans.fi.sec)
