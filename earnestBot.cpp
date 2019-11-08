@@ -23,6 +23,7 @@ int solCol,oppCol,oppTownCol,townCol;
 int maxDepthTree=3;/*MiniMax made for maxDepth*/
 int timelimit;	
 int numofCannons;
+int cnt=0;
 
 struct node
 {
@@ -286,6 +287,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 					isCannon(board,i,j,i-fmove,j+1,i-2*fmove,j+2,solCol))
 					isPartOfCannon=true;
 
+				/*Cannon moves*/
 				if(isCannon(board,i,j,i+fmove,j,i+2*fmove,j,solCol))
 				{
 					if(boardCell(i+4*fmove,j,n,m) && !isColorSoldier(board,i+4*fmove,j,solCol,townCol) 
@@ -343,28 +345,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j));
 						child.pb(temp);
 						cannonPart=true;
-					}
-
-					if(!(cannonMoveSoldier || cannonMoveTown))
-					{
-						if(boardCell(i-fmove,j,n,m) && isColorSoldier(board,i-fmove,j,empBlock,empBlock))
-						{
-							temp.board=changeBoard(board,i+2*fmove,j,i-fmove,j,false);
-							temp.score=eval(temp.board)+(90000);
-
-							temp.isCannonMove=false;
-							temp.changeCoordi=mp(mp(i+2*fmove,j),mp(i-fmove,j));
-							child.pb(temp);
-						}
-						if(boardCell(i+3*fmove,j,n,m) && isColorSoldier(board,i+3*fmove,j,empBlock,empBlock))
-						{
-							temp.board=changeBoard(board,i,j,i+3*fmove,j,false);
-							temp.score=eval(temp.board)+(90000);
-							temp.isCannonMove=false;
-							temp.changeCoordi=mp(mp(i,j),mp(i+3*fmove,j));
-							child.pb(temp);
-						}
-					}
+					}	
 				}
 
 				if(isCannon(board,i,j,i+fmove,j+1,i+2*fmove,j+2,solCol))
@@ -423,26 +404,6 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j-3));
 						child.pb(temp);
 					}
-
-					if(!(cannonMoveSoldier || cannonMoveTown))
-					{
-						if(boardCell(i-fmove,j-1,n,m) && isColorSoldier(board,i-fmove,j-1,empBlock,empBlock))
-						{
-							temp.board=changeBoard(board,i+2*fmove,j+2,i-fmove,j-1,false);
-							temp.score=eval(temp.board)+(90000);
-							temp.isCannonMove=false;
-							temp.changeCoordi=mp(mp(i+2*fmove,j+2),mp(i-fmove,j-1));
-							child.pb(temp);
-						}
-						if(boardCell(i+3*fmove,j+3,n,m) && isColorSoldier(board,i+3*fmove,j+3,empBlock,empBlock))
-						{
-							temp.board=changeBoard(board,i,j,i+3*fmove,j+3,false);
-							temp.score=eval(temp.board)+(90000);
-							temp.isCannonMove=false;
-							temp.changeCoordi=mp(mp(i,j),mp(i+3*fmove,j+3));
-							child.pb(temp);
-						}
-					}
 				}
 
 				if(isCannon(board,i,j,i+fmove,j-1,i+2*fmove,j-2,solCol))
@@ -500,13 +461,81 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j+3));
 						child.pb(temp);
 					}
+				}
 
+				if(isCannon(board,i,j,i+fmove,j,i+2*fmove,j,solCol))
+				{
+					if(!(cannonMoveSoldier || cannonMoveTown))
+					{
+						if(boardCell(i-fmove,j,n,m) && isColorSoldier(board,i-fmove,j,empBlock,empBlock))
+						{
+							temp.board=changeBoard(board,i+2*fmove,j,i-fmove,j,false);
+							temp.score=eval(temp.board)+(9000000);
+							if(!isSuicide(temp.board,i-fmove,j))
+								temp.score+=(9000000);
+
+							temp.isCannonMove=false;
+							temp.changeCoordi=mp(mp(i+2*fmove,j),mp(i-fmove,j));
+							child.pb(temp);
+						}
+						if(boardCell(i+3*fmove,j,n,m) && isColorSoldier(board,i+3*fmove,j,empBlock,empBlock))
+						{
+							temp.board=changeBoard(board,i,j,i+3*fmove,j,false);
+							temp.score=eval(temp.board)+(9000000);
+							if(!isSuicide(temp.board,i+3*fmove,j))
+								temp.score+=(9000000);
+							if(!isSuicide(temp.board,i+3*fmove,j) && isColorSoldier(board,i+6*fmove,j,oppTownCol,oppTownCol))
+								temp.score+=(10000000);
+
+							temp.isCannonMove=false;
+							temp.changeCoordi=mp(mp(i,j),mp(i+3*fmove,j));
+							child.pb(temp);
+						}
+					}
+				}
+
+				if(isCannon(board,i,j,i+fmove,j+1,i+2*fmove,j+2,solCol))
+				{
+					if(!(cannonMoveSoldier || cannonMoveTown))
+					{
+						if(boardCell(i-fmove,j-1,n,m) && isColorSoldier(board,i-fmove,j-1,empBlock,empBlock))
+						{
+							temp.board=changeBoard(board,i+2*fmove,j+2,i-fmove,j-1,false);
+							temp.score=eval(temp.board)+(9000000);
+							if(!isSuicide(temp.board,i-fmove,j-1))
+								temp.score+=(9000000);
+
+							temp.isCannonMove=false;
+							temp.changeCoordi=mp(mp(i+2*fmove,j+2),mp(i-fmove,j-1));
+							child.pb(temp);
+						}
+						if(boardCell(i+3*fmove,j+3,n,m) && isColorSoldier(board,i+3*fmove,j+3,empBlock,empBlock))
+						{
+							temp.board=changeBoard(board,i,j,i+3*fmove,j+3,false);
+							temp.score=eval(temp.board)+(9000000);
+							if(!isSuicide(temp.board,i+3*fmove,j+3))
+								temp.score+=(9000000);
+							if(!isSuicide(temp.board,i+3*fmove,j+3) && isColorSoldier(board,i+6*fmove,j+6,oppTownCol,oppTownCol))
+								temp.score+=(10000000);
+
+							temp.isCannonMove=false;
+							temp.changeCoordi=mp(mp(i,j),mp(i+3*fmove,j+3));
+							child.pb(temp);
+						}
+					}
+				}
+
+				if(isCannon(board,i,j,i+fmove,j-1,i+2*fmove,j-2,solCol))
+				{
 					if(!(cannonMoveTown || cannonMoveSoldier))
 					{
 						if(boardCell(i-fmove,j+1,n,m) && isColorSoldier(board,i-fmove,j+1,empBlock,empBlock))
 						{
 							temp.board=changeBoard(board,i+2*fmove,j-2,i-fmove,j+1,false);
-							temp.score=eval(temp.board)+(90000);
+							temp.score=eval(temp.board)+(9000000);
+							if(!isSuicide(temp.board,i-fmove,j+1))
+								temp.score+=(9000000);
+
 							temp.isCannonMove=false;
 							temp.changeCoordi=mp(mp(i+2*fmove,j-2),mp(i-fmove,j+1));
 							child.pb(temp);
@@ -514,13 +543,21 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						if(boardCell(i+3*fmove,j-3,n,m) && isColorSoldier(board,i+3*fmove,j-3,empBlock,empBlock))
 						{
 							temp.board=changeBoard(board,i,j,i+3*fmove,j-3,false);
-							temp.score=eval(temp.board)+(90000);
+							temp.score=eval(temp.board)+(9000000);
+							if(!isSuicide(temp.board,i+3*fmove,j-3))
+								temp.score+=(9000000);
+							if(!isSuicide(temp.board,i+3*fmove,j-3) && isColorSoldier(board,i+6*fmove,j-6,oppTownCol,oppTownCol))
+								temp.score+=(10000000);
+
 							temp.isCannonMove=false;
 							temp.changeCoordi=mp(mp(i,j),mp(i+3*fmove,j-3));
 							child.pb(temp);
 						}
 					}
 				}
+
+				if(cnt<=1)
+					continue;
 
 				if(!cannonMoveTown)
 				{
@@ -536,9 +573,9 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 							if(isColorSoldier(board,i+fmove,j,oppCol,oppCol) && !isSuicide(temp.board,i+fmove,j))
 								temp.score+=(200000),locSoldier=true;
 							if(isSuicide(temp.board,i+fmove,j))
-								temp.score-=(20000);
-							if(isPartOfCannon)
-								temp.score-=(900000);
+								temp.score-=(2000000);
+							/*if(isPartOfCannon)
+								temp.score-=(900000);*/
 						}
 
 						temp.changeCoordi=mp(mp(i,j),mp(i+fmove,j));
@@ -560,11 +597,11 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						else
 						{
 							if(isColorSoldier(board,i+fmove,j+1,oppCol,oppCol) && !isSuicide(temp.board,i+fmove,j+1))
-								temp.score+=(20000),locSoldier=true;
+								temp.score+=(200000),locSoldier=true;
 							if(isSuicide(temp.board,i+fmove,j+1))
-								temp.score-=(20000);
-							if(isPartOfCannon)
-								temp.score-=(900000);
+								temp.score-=(2000000);
+							/*if(isPartOfCannon)
+								temp.score-=(900000);*/
 						}
 
 						temp.changeCoordi=mp(mp(i,j),mp(i+fmove,j+1));
@@ -586,11 +623,11 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						else
 						{
 							if(isColorSoldier(board,i+fmove,j-1,oppCol,oppCol) && !isSuicide(temp.board,i+fmove,j-1))
-								temp.score+=(20000),locSoldier=true;
+								temp.score+=(200000),locSoldier=true;
 							if(isSuicide(temp.board,i+fmove,j-1))
-								temp.score-=(20000);
-							if(isPartOfCannon)
-								temp.score-=(900000);
+								temp.score-=(2000000);
+							/*if(isPartOfCannon)
+								temp.score-=(900000);*/
 						}
 
 						temp.changeCoordi=mp(mp(i,j),mp(i+fmove,j-1));
@@ -604,6 +641,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 					}
 				}
 
+				
 				if(!(cannonMoveTown || fwdMoveTown))
 				{
 					/*Sideways Capture Moves*/
@@ -618,8 +656,10 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						{
 							if(isColorSoldier(board,i,j+1,oppCol,oppCol) && !isSuicide(temp.board,i,j+1))
 								temp.score+=(20000);
-							if(isPartOfCannon)
-								temp.score-=(900000);
+							if(isSuicide(temp.board,i,j+1))
+								temp.score-=(2000000);
+							/*if(isPartOfCannon)
+								temp.score-=(900000);*/
 						}
 
 						temp.changeCoordi=mp(mp(i,j),mp(i,j+1));
@@ -637,8 +677,10 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						{
 							if(isColorSoldier(board,i,j-1,oppCol,oppCol) && !isSuicide(temp.board,i,j-1))
 								temp.score+=(20000);
-							if(isPartOfCannon)
-								temp.score-=(900000);
+							if(isSuicide(temp.board,i,j-1))
+								temp.score-=(2000000);
+							/*if(isPartOfCannon)
+								temp.score-=(900000);*/
 						}
 
 						temp.changeCoordi=mp(mp(i,j),mp(i,j-1));
@@ -656,9 +698,9 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 							temp.score=eval(temp.board);
 
 							if(isSuicide(board,i,j))
-								temp.score+=(20000);
-							if(isPartOfCannon)
-								temp.score-=(20000);
+								temp.score-=(200000);
+							/*if(isPartOfCannon)
+								temp.score-=(20000);*/
 							temp.changeCoordi=mp(mp(i,j),mp(i+bmove,j));
 							temp.isCannonMove=false;
 							child.pb(temp);
@@ -668,9 +710,9 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 							temp.board=changeBoard(board,i,j,i+bmove,j-2,false);
 							temp.score=eval(temp.board);
 							if(isSuicide(board,i,j))
-								temp.score+=(20000);
-							if(isPartOfCannon)
-								temp.score-=(20000);
+								temp.score-=(200000);
+							/*if(isPartOfCannon)
+								temp.score-=(20000);*/
 							temp.changeCoordi=mp(mp(i,j),mp(i+bmove,j-2));
 							temp.isCannonMove=false;
 							child.pb(temp);
@@ -680,384 +722,15 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 							temp.board=changeBoard(board,i,j,i+bmove,j+2,false);
 							temp.score=eval(temp.board);
 							if(isSuicide(board,i,j))
-								temp.score+=(20000);
-							if(isPartOfCannon)
-								temp.score-=(20000);
+								temp.score-=(200000);
+							/*if(isPartOfCannon)
+								temp.score-=(20000);*/
 							temp.changeCoordi=mp(mp(i,j),mp(i+bmove,j+2));
 							temp.isCannonMove=false;
 							child.pb(temp);
 						}
 					}
 				}
-
-				// if(isCannon(board,i,j,i+fmove,j,i+2*fmove,j,solCol))
-				// {
-				// 	// isPartOfCannon=true;
-				// 	/*if(boardCell(i+4*fmove,j,n,m) && !isColorSoldier(board,i+4*fmove,j,solCol,townCol) 
-				// 		&& !isColorSoldier(board,i+3*fmove,j,oppCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i+4*fmove,j,true);
-				// 		temp.score=eval(temp.board);
-				// 		if(isColorSoldier(board,i+4*fmove,j,oppTownCol,oppTownCol))
-				// 			temp.score+=(40000000);
-				// 		if(isColorSoldier(board,i+4*fmove,j,oppCol,oppCol))
-				// 			temp.score+=(9000000);
-				// 		temp.isCannonMove=true;
-				// 		temp.changeCoordi=mp(mp(i+2*fmove,j),mp(i+4*fmove,j));
-				// 		child.pb(temp);
-				// 	}*/
-				// 	/*if(boardCell(i+5*fmove,j,n,m) && !isColorSoldier(board,i+5*fmove,j,solCol,townCol) 
-				// 		&& !isColorSoldier(board,i+3*fmove,j,oppCol,solCol) && !isColorSoldier(board,i+4*fmove,j,townCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i+5*fmove,j,true);
-				// 		temp.score=eval(temp.board);
-				// 		if(isColorSoldier(board,i+5*fmove,j,oppTownCol,oppTownCol))
-				// 			temp.score+=(40000000);
-				// 		if(isColorSoldier(board,i+5*fmove,j,oppCol,oppCol))
-				// 			temp.score+=(9000000);
-				// 		temp.isCannonMove=true;
-				// 		temp.changeCoordi=mp(mp(i+2*fmove,j),mp(i+5*fmove,j));
-				// 		child.pb(temp);
-				// 	}*/
-				// 	if(boardCell(i-2*fmove,j,n,m) && !isColorSoldier(board,i-2*fmove,j,solCol,townCol) 
-				// 		&& !isColorSoldier(board,i-fmove,j,oppCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i-2*fmove,j,true);
-				// 		temp.score=eval(temp.board);
-				// 		if(isColorSoldier(board,i-2*fmove,j,oppTownCol,oppTownCol))
-				// 			temp.score+=(40000000);
-				// 		if(isColorSoldier(board,i-2*fmove,j,oppCol,oppCol))
-				// 			temp.score+=(9000000);
-				// 		temp.isCannonMove=true;
-				// 		temp.changeCoordi=mp(mp(i,j),mp(i-2*fmove,j));
-				// 		child.pb(temp);
-				// 	}
-				// 	/*if(boardCell(i-3*fmove,j,n,m) && !isColorSoldier(board,i-3*fmove,j,solCol,townCol) 
-				// 		&& !isColorSoldier(board,i-fmove,j,oppCol,solCol) && !isColorSoldier(board,i-2*fmove,j,townCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i-3*fmove,j,true);
-				// 		temp.score=eval(temp.board);
-				// 		if(isColorSoldier(board,i-3*fmove,j,oppTownCol,oppTownCol))
-				// 			temp.score+=(40000000);
-				// 		if(isColorSoldier(board,i-3*fmove,j,oppCol,oppCol))
-				// 			temp.score+=(9000000);
-				// 		temp.isCannonMove=true;
-				// 		temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j));
-				// 		child.pb(temp);
-				// 	}*/
-				// 	/*if(boardCell(i-fmove,j,n,m) && isColorSoldier(board,i-fmove,j,empBlock,empBlock))
-				// 	{
-				// 		temp.board=changeBoard(board,i+2*fmove,j,i-fmove,j,false);
-				// 		temp.score=eval(temp.board)+(90000);
-
-				// 		temp.isCannonMove=false;
-				// 		temp.changeCoordi=mp(mp(i+2*fmove,j),mp(i-fmove,j));
-				// 		child.pb(temp);
-				// 	}*/
-				// 	/*if(boardCell(i+3*fmove,j,n,m) && isColorSoldier(board,i+3*fmove,j,empBlock,empBlock))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i+3*fmove,j,false);
-				// 		temp.score=eval(temp.board)+(90000);
-				// 		temp.isCannonMove=false;
-				// 		temp.changeCoordi=mp(mp(i,j),mp(i+3*fmove,j));
-				// 		child.pb(temp);
-				// 	}*/
-				// }
-
-				/*Right Diagonal Cannon*/
-				// if(isCannon(board,i,j,i+fmove,j+1,i+2*fmove,j+2,solCol))
-				// {
-				// 	// isPartOfCannon=true;
-				// 	if(boardCell(i+4*fmove,j+4,n,m) && !isColorSoldier(board,i+4*fmove,j+4,solCol,townCol) 
-				// 		&& !isColorSoldier(board,i+3*fmove,j+3,oppCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i+4*fmove,j+4,true);
-				// 		temp.score=eval(temp.board);
-				// 		if(isColorSoldier(board,i+4*fmove,j+4,oppTownCol,oppTownCol))
-				// 			temp.score+=(40000000);
-				// 		if(isColorSoldier(board,i+4*fmove,j+4,oppCol,oppCol))
-				// 			temp.score+=(9000000);
-						
-				// 		temp.isCannonMove=true;
-				// 		temp.changeCoordi=mp(mp(i+2*fmove,j+2),mp(i+4*fmove,j+4));
-				// 		child.pb(temp);
-				// 	}
-				// 	if(boardCell(i+5*fmove,j+5,n,m) && !isColorSoldier(board,i+5*fmove,j+5,solCol,townCol) 
-				// 		&& !isColorSoldier(board,i+3*fmove,j+3,oppCol,solCol) && !isColorSoldier(board,i+4*fmove,j+4,townCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i+5*fmove,j+5,true);
-				// 		temp.score=eval(temp.board);
-				// 		if(isColorSoldier(board,i+5*fmove,j+5,oppTownCol,oppTownCol))
-				// 			temp.score+=(40000000);
-				// 		if(isColorSoldier(board,i+5*fmove,j+5,oppCol,oppCol))
-				// 			temp.score+=(9000000);
-				// 		temp.isCannonMove=true;
-				// 		temp.changeCoordi=mp(mp(i+2*fmove,j+2),mp(i+5*fmove,j+5));
-				// 		child.pb(temp);
-				// 	}
-				// 	if(boardCell(i-2*fmove,j-2,n,m) && !isColorSoldier(board,i-2*fmove,j-2,solCol,townCol) 
-				// 		&& !isColorSoldier(board,i-fmove,j-1,oppCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i-2*fmove,j-2,true);
-				// 		temp.score=eval(temp.board);
-				// 		if(isColorSoldier(board,i-2*fmove,j-2,oppTownCol,oppTownCol))
-				// 			temp.score+=(40000000);
-				// 		if(isColorSoldier(board,i-2*fmove,j-2,oppCol,oppCol))
-				// 			temp.score+=(9000000);
-				// 		temp.isCannonMove=true;
-				// 		temp.changeCoordi=mp(mp(i,j),mp(i-2*fmove,j-2));
-				// 		child.pb(temp);
-				// 	}
-				// 	if(boardCell(i-3*fmove,j-3,n,m) && !isColorSoldier(board,i-3*fmove,j-3,solCol,townCol) 
-				// 		&& !isColorSoldier(board,i-fmove,j-1,oppCol,solCol) && !isColorSoldier(board,i-2*fmove,j-2,townCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i-3*fmove,j-3,true);
-				// 		temp.score=eval(temp.board);
-				// 		if(isColorSoldier(board,i-3*fmove,j-3,oppTownCol,oppTownCol))
-				// 			temp.score+=(40000000);
-				// 		if(isColorSoldier(board,i-3*fmove,j-3,oppCol,oppCol))
-				// 			temp.score+=(9000000);
-				// 		temp.isCannonMove=true;
-				// 		temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j-3));
-				// 		child.pb(temp);
-				// 	}
-				// 	/*if(boardCell(i-fmove,j-1,n,m) && isColorSoldier(board,i-fmove,j-1,empBlock,empBlock))
-				// 	{
-				// 		temp.board=changeBoard(board,i+2*fmove,j+2,i-fmove,j-1,false);
-				// 		temp.score=eval(temp.board)+(90000);
-				// 		temp.isCannonMove=false;
-				// 		temp.changeCoordi=mp(mp(i+2*fmove,j+2),mp(i-fmove,j-1));
-				// 		child.pb(temp);
-				// 	}
-				// 	if(boardCell(i+3*fmove,j+3,n,m) && isColorSoldier(board,i+3*fmove,j+3,empBlock,empBlock))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i+3*fmove,j+3,false);
-				// 		temp.score=eval(temp.board)+(90000);
-				// 		temp.isCannonMove=false;
-				// 		temp.changeCoordi=mp(mp(i,j),mp(i+3*fmove,j+3));
-				// 		child.pb(temp);
-				// 	}*/
-				// }
-
-				/*Left Diagonal Cannon*/
-				// if(isCannon(board,i,j,i+fmove,j-1,i+2*fmove,j-2,solCol))
-				// {
-				// 	// isPartOfCannon=true;
-				// 	if(boardCell(i+4*fmove,j-4,n,m) && !isColorSoldier(board,i+4*fmove,j-4,solCol,townCol) 
-				// 		&& !isColorSoldier(board,i+3*fmove,j-3,oppCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i+4*fmove,j-4,true);
-				// 		temp.score=eval(temp.board);
-				// 		if(isColorSoldier(board,i+4*fmove,j-4,oppTownCol,oppTownCol))
-				// 			temp.score+=(40000000);
-				// 		if(isColorSoldier(board,i+4*fmove,j-4,oppCol,oppCol))
-				// 			temp.score+=(9000000);
-				// 		temp.isCannonMove=true;
-				// 		temp.changeCoordi=mp(mp(i+2*fmove,j-2),mp(i+4*fmove,j-4));
-				// 		child.pb(temp);
-				// 	}
-				// 	if(boardCell(i+5*fmove,j-5,n,m) && !isColorSoldier(board,i+5*fmove,j-5,solCol,townCol) 
-				// 		&& !isColorSoldier(board,i+3*fmove,j-3,oppCol,solCol) && !isColorSoldier(board,i+4*fmove,j-4,townCol,solCol))
-				// 	{ 
-				// 		temp.board=changeBoard(board,i,j,i+5*fmove,j-5,true);
-				// 		temp.score=eval(temp.board);
-				// 		if(isColorSoldier(board,i+5*fmove,j-5,oppTownCol,oppTownCol))
-				// 			temp.score+=(40000000);
-				// 		if(isColorSoldier(board,i+5*fmove,j-5,oppCol,oppCol))
-				// 			temp.score+=(9000000);
-				// 		temp.isCannonMove=true;
-				// 		temp.changeCoordi=mp(mp(i+2*fmove,j-2),mp(i+5*fmove,j-5));
-				// 		child.pb(temp);
-				// 	}
-				// 	if(boardCell(i-2*fmove,j+2,n,m) && !isColorSoldier(board,i-2*fmove,j+2,solCol,townCol) 
-				// 		&& !isColorSoldier(board,i-fmove,j+1,oppCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i-2*fmove,j+2,true);
-				// 		temp.score=eval(temp.board);
-				// 		if(isColorSoldier(board,i-2*fmove,j+2,oppTownCol,oppTownCol))
-				// 			temp.score+=(40000000);
-				// 		if(isColorSoldier(board,i-2*fmove,j+2,oppCol,oppCol))
-				// 			temp.score+=(9000000);
-				// 		temp.isCannonMove=true;
-				// 		temp.changeCoordi=mp(mp(i,j),mp(i-2*fmove,j+2));
-				// 		child.pb(temp);
-				// 	}
-				// 	if(boardCell(i-3*fmove,j+3,n,m) && !isColorSoldier(board,i-3*fmove,j+3,solCol,townCol) 
-				// 		&& !isColorSoldier(board,i-fmove,j+1,oppCol,solCol) && !isColorSoldier(board,i-2*fmove,j+2,oppCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i-3*fmove,j+3,true);
-				// 		temp.score=eval(temp.board);
-				// 		if(isColorSoldier(board,i-3*fmove,j+3,oppTownCol,oppTownCol))
-				// 			temp.score+=(40000000);
-				// 		if(isColorSoldier(board,i-3*fmove,j+3,oppCol,oppCol))
-				// 			temp.score+=(9000000);
-				// 		temp.isCannonMove=true;
-				// 		temp.changeCoordi=mp(mp(i,j),mp(i-3*fmove,j+3));
-				// 		child.pb(temp);
-				// 	}
-				// 	/*if(boardCell(i-fmove,j+1,n,m) && isColorSoldier(board,i-fmove,j+1,empBlock,empBlock))
-				// 	{
-				// 		temp.board=changeBoard(board,i+2*fmove,j-2,i-fmove,j+1,false);
-				// 		temp.score=eval(temp.board)+(90000);
-				// 		temp.isCannonMove=false;
-				// 		temp.changeCoordi=mp(mp(i+2*fmove,j-2),mp(i-fmove,j+1));
-				// 		child.pb(temp);
-				// 	}
-				// 	if(boardCell(i+3*fmove,j-3,n,m) && isColorSoldier(board,i+3*fmove,j-3,empBlock,empBlock))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i+3*fmove,j-3,false);
-				// 		temp.score=eval(temp.board)+(90000);
-				// 		temp.isCannonMove=false;
-				// 		temp.changeCoordi=mp(mp(i,j),mp(i+3*fmove,j-3));
-				// 		child.pb(temp);
-				// 	}*/
-				// }
-
-				/*Forward Moves*/
-				/*if(boardCell(i+fmove, j, n, m) && !isColorSoldier(board,i+fmove,j,solCol,solCol))
-				{
-					temp.board=changeBoard(board,i,j,i+fmove,j,false);
-					temp.score=eval(temp.board);
-					if(isColorSoldier(board,i+fmove,j,oppTownCol,oppTownCol))
-						temp.score+=(40000000);
-					else
-					{
-						if(isColorSoldier(board,i+fmove,j,oppCol,oppCol) && !isSuicide(temp.board,i+fmove,j))
-							temp.score+=(200000);
-						if(isSuicide(temp.board,i+fmove,j))
-							temp.score-=(20000);
-						if(isPartOfCannon)
-							temp.score-=(900000);
-					}
-
-					temp.changeCoordi=mp(mp(i,j),mp(i+fmove,j));
-					temp.isCannonMove=false;
-					child.pb(temp);
-				}*/
-				/*if(boardCell(i+fmove,j+1,n,m) && !isColorSoldier(board,i+fmove,j+1,solCol,solCol))
-				{
-					temp.board=changeBoard(board,i,j,i+fmove,j+1,false);
-					temp.score=eval(temp.board);
-					if(isColorSoldier(board,i+fmove,j+1,oppTownCol,oppTownCol))
-						temp.score+=(40000000);
-					else
-					{
-						if(isColorSoldier(board,i+fmove,j+1,oppCol,oppCol) && !isSuicide(temp.board,i+fmove,j+1))
-							temp.score+=(20000);
-						if(isSuicide(temp.board,i+fmove,j+1))
-							temp.score-=(20000);
-						if(isPartOfCannon)
-							temp.score-=(900000);
-					}
-
-					temp.changeCoordi=mp(mp(i,j),mp(i+fmove,j+1));
-					temp.isCannonMove=false;
-					child.pb(temp);
-				}*/
-				/*if(boardCell(i+fmove,j-1,n,m) && !isColorSoldier(board,i+fmove,j-1,solCol,solCol))
-				{
-					temp.board=changeBoard(board,i,j,i+fmove,j-1,false);
-					temp.score=eval(temp.board);
-					if(isColorSoldier(board,i+fmove,j-1,oppTownCol,oppTownCol))
-						temp.score+=(40000000);
-					else
-					{
-						if(isColorSoldier(board,i+fmove,j-1,oppCol,oppCol) && !isSuicide(temp.board,i+fmove,j-1))
-							temp.score+=(20000);
-						if(isSuicide(temp.board,i+fmove,j-1))
-							temp.score-=(20000);
-						if(isPartOfCannon)
-							temp.score-=(900000);
-					}
-
-					temp.changeCoordi=mp(mp(i,j),mp(i+fmove,j-1));
-					temp.isCannonMove=false;
-					child.pb(temp);
-				}*/
-				
-
-				// /*Sideways Capture Moves*/
-				// bool isSideMovePossible=false;
-				// if(isSoldier(i,j+1,n,m,oppCol,oppTownCol,board))
-				// {
-				// 	temp.board=changeBoard(board,i,j,i,j+1,false);
-				// 	temp.score=eval(temp.board);
-				// 	if(isColorSoldier(board,i,j+1,oppTownCol,oppTownCol))
-				// 		temp.score+=(40000000);
-				// 	else
-				// 	{
-				// 		if(isColorSoldier(board,i,j+1,oppCol,oppCol) && !isSuicide(temp.board,i,j+1))
-				// 			temp.score+=(20000);
-				// 		if(isPartOfCannon)
-				// 			temp.score-=(900000);
-				// 	}
-
-				// 	temp.changeCoordi=mp(mp(i,j),mp(i,j+1));
-				// 	temp.isCannonMove=false;
-				// 	child.pb(temp);
-				// 	isSideMovePossible=true;
-				// }
-				// if(isSoldier(i,j-1,n,m,oppCol,oppTownCol,board))
-				// {
-				// 	temp.board=changeBoard(board,i,j,i,j-1,false);
-				// 	temp.score=eval(temp.board);
-				// 	if(isColorSoldier(board,i,j-1,oppTownCol,oppTownCol))
-				// 		temp.score+=(40000000);
-				// 	else
-				// 	{
-				// 		if(isColorSoldier(board,i,j-1,oppCol,oppCol) && !isSuicide(temp.board,i,j-1))
-				// 			temp.score+=(20000);
-				// 		if(isPartOfCannon)
-				// 			temp.score-=(900000);
-				// 	}
-
-				// 	temp.changeCoordi=mp(mp(i,j),mp(i,j-1));
-				// 	temp.isCannonMove=false;
-				// 	child.pb(temp);
-				// 	isSideMovePossible=true;
-				// }
-
-				// /*Backward Moves*/
-				// if(isSideMovePossible)
-				// {
-				// 	if(boardCell(i+bmove,j,n,m) && !isColorSoldier(board,i+bmove,j,solCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i+bmove,j,false);
-				// 		temp.score=eval(temp.board);
-
-				// 		if(isSuicide(board,i,j))
-				// 			temp.score+=(20000);
-				// 		if(isPartOfCannon)
-				// 			temp.score-=(20000);
-				// 		temp.changeCoordi=mp(mp(i,j),mp(i+bmove,j));
-				// 		temp.isCannonMove=false;
-				// 		child.pb(temp);
-				// 	}
-				// 	if(boardCell(i+bmove,j-2,n,m) && !isColorSoldier(board,i+bmove,j-2,solCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i+bmove,j-2,false);
-				// 		temp.score=eval(temp.board);
-				// 		if(isSuicide(board,i,j))
-				// 			temp.score+=(20000);
-				// 		if(isPartOfCannon)
-				// 			temp.score-=(20000);
-				// 		temp.changeCoordi=mp(mp(i,j),mp(i+bmove,j-2));
-				// 		temp.isCannonMove=false;
-				// 		child.pb(temp);
-				// 	}
-				// 	if(boardCell(i+bmove,j+2,n,m) && !isColorSoldier(board,i+bmove,j+2,solCol,solCol))
-				// 	{
-				// 		temp.board=changeBoard(board,i,j,i+bmove,j+2,false);
-				// 		temp.score=eval(temp.board);
-				// 		if(isSuicide(board,i,j))
-				// 			temp.score+=(20000);
-				// 		if(isPartOfCannon)
-				// 			temp.score-=(20000);
-				// 		temp.changeCoordi=mp(mp(i,j),mp(i+bmove,j+2));
-				// 		temp.isCannonMove=false;
-				// 		child.pb(temp);
-				// 	}
-				// }
 			}
 		}
 	}
@@ -1178,6 +851,7 @@ int main(){
 
 	while(true)
 	{
+		cnt++;
 		string str;
 		char t[6];
 		cin>>t[0]>>t[1]>>t[2]>>t[3]>>t[4]>>t[5];
