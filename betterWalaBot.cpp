@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
+#include "./stdc++.h"
 using namespace std;
 #define pii pair<int,int>
 #define mp make_pair
@@ -34,6 +34,7 @@ struct node
 	bool isCannonMove;
 };
 
+pair<pair<double,bool>,pair<pii,pii> > prev_ans=mp(mp(0,false),mp(mp(0,0),mp(0,0)));
 
 // if the cell belongs to the board
 bool boardCell(int i, int j, int n, int m)
@@ -116,6 +117,36 @@ bool retLoc(int i,int row, int col)
 	}
 
 	return false;
+}
+
+//Find best move amongst moves of different depths
+//Helper function to remove stalmate
+
+int best_move(vector<pair<pair<double,bool>,pair<pii,pii> >> &answers)
+{
+	cerr << "Entered function\n";
+
+	int max,i=0,index;
+	pair<pair<double,bool>,pair<pii,pii> > ans;	
+	vector<pair<pair<double,bool>,pair<pii,pii> >>::iterator it;
+
+	max = answers[0].fi.fi;
+
+	for(it=answers.begin();it!=answers.end();it++){
+		cerr << (*it).fi.fi << "\n";
+		if((*it).fi.fi>max){
+			max = (*it).fi.fi;
+			ans = (*it);
+			index = i;
+		}
+		i++;
+	}
+
+	cerr << "Loop done\n";
+
+	cerr << "New array made\n";
+
+	return index;
 }
 
 /*evaluation function consists of next move attacks :-
@@ -280,11 +311,13 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 
 				/*Cannon Moves*/
 				/*Orthogonal Cannon*/
+				/*Horizontal cannons also added*/
 				if(isCannon(board,i,j,i+fmove,j,i+2*fmove,j,solCol)|| isCannon(board,i,j,i-fmove,j,i-2*fmove,j,solCol)||
 					isCannon(board,i,j,i+fmove,j,i-fmove,j,solCol)|| isCannon(board,i,j,i+fmove,j+1,i+2*fmove,j+2,solCol)||
 					isCannon(board,i,j,i-fmove,j-1,i+fmove,j+1,solCol)||isCannon(board,i,j,i-fmove,j-1,i-2*fmove,j-2,solCol)||
 					isCannon(board,i,j,i-fmove,j+1,i+fmove,j-1,solCol)||isCannon(board,i,j,i+fmove,j-1,i+2*fmove,j-2,solCol)||
-					isCannon(board,i,j,i-fmove,j+1,i-2*fmove,j+2,solCol))
+					isCannon(board,i,j,i-fmove,j+1,i-2*fmove,j+2,solCol)||isCannon(board,i,j,i,j+fmove,i,j+2*fmove,solCol)||
+					isCannon(board,i,j,i,j-fmove,i,j-2*fmove,solCol)||isCannon(board,i,j,i,j-fmove,i,j+fmove,solCol	))
 					isPartOfCannon=true;
 
 				if(isCannon(board,i,j,i+fmove,j,i+2*fmove,j,solCol))
@@ -538,6 +571,93 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						}
 					}
 				}
+				//Implementing horizontal cannon attacks
+
+				if(isCannon(board,i,j,i,j-1,i,j-2,solCol))
+				{
+					if(boardCell(i,j+2,n,m) && !isColorSoldier(board,i,j+2,solCol,townCol) 
+							&& !isColorSoldier(board,i,j+1,oppCol,solCol))
+						{
+							temp.board=changeBoard(board,i,j,i,j+2,true);
+							temp.score=eval(temp.board);
+							if(isColorSoldier(board,i,j+2,oppTownCol,oppTownCol))
+								temp.score+=(40000000),cannonMoveTown=true;
+							if(isColorSoldier(board,i,j+2,oppCol,oppCol))
+								temp.score+=(9000000),cannonMoveSoldier=true;
+							temp.isCannonMove=true;
+							temp.changeCoordi=mp(mp(i,j),mp(i,j+2));
+							child.pb(temp);
+							cannonPart=true;
+						}
+						if(boardCell(i,j+3,n,m) && !isColorSoldier(board,i,j+3,solCol,townCol) 
+							&& !isColorSoldier(board,i,j+1,oppCol,solCol) && !isColorSoldier(board,i,j+2,townCol,solCol))
+						{
+							temp.board=changeBoard(board,i,j,i,j+3,true);
+							temp.score=eval(temp.board);
+							if(isColorSoldier(board,i,j+3,oppTownCol,oppTownCol))
+								temp.score+=(40000000),cannonMoveTown=true;
+							if(isColorSoldier(board,i,j+3,oppCol,oppCol))
+								temp.score+=(9000000),cannonMoveSoldier=true;
+							temp.isCannonMove=true;
+							temp.changeCoordi=mp(mp(i,j),mp(i,j+3));
+							child.pb(temp);
+							cannonPart=true;
+						}
+						if(boardCell(i,j-4,n,m) && !isColorSoldier(board,i,j-4,solCol,townCol) 
+							&& !isColorSoldier(board,i,j-3,oppCol,solCol))
+						{
+							temp.board=changeBoard(board,i,j,i,j-4,true);
+							temp.score=eval(temp.board);
+							if(isColorSoldier(board,i,j-4,oppTownCol,oppTownCol))
+								temp.score+=(40000000),cannonMoveTown=true;
+							if(isColorSoldier(board,i,j-4,oppCol,oppCol))
+								temp.score+=(9000000),cannonMoveSoldier=true;
+							temp.isCannonMove=true;
+							temp.changeCoordi=mp(mp(i,j),mp(i,j-4));
+							child.pb(temp);
+							cannonPart=true;
+						}
+						if(boardCell(i,j-5,n,m) && !isColorSoldier(board,i,j-5,solCol,townCol) 
+							&& !isColorSoldier(board,i,j-3,oppCol,solCol) && !isColorSoldier(board,i,j-4,townCol,solCol))
+						{
+							temp.board=changeBoard(board,i,j,i,j-5,true);
+							temp.score=eval(temp.board);
+							if(isColorSoldier(board,i,j-5,oppTownCol,oppTownCol))
+								temp.score+=(40000000),cannonMoveTown=true;
+							if(isColorSoldier(board,i,j-5,oppCol,oppCol))
+								temp.score+=(9000000),cannonMoveSoldier=true;
+							temp.isCannonMove=true;
+							temp.changeCoordi=mp(mp(i,j),mp(i,j-5));
+							child.pb(temp);
+							cannonPart=true;
+						}
+
+						// if(!(cannonMoveSoldier || cannonMoveTown))
+						// {
+						// 	if(boardCell(i,j-3,n,m) && isColorSoldier(board,i,j-3,empBlock,empBlock))
+						// 	{
+						// 		temp.board=changeBoard(board,i,j,i-fmove,j,false);
+						// 		temp.score=eval(temp.board)+(9000000);
+						// 		if(!isSuicide(temp.board,i-fmove,j))
+						// 			temp.score+=(9000000);
+
+						// 		temp.isCannonMove=false;
+						// 		temp.changeCoordi=mp(mp(i+2*fmove,j),mp(i-fmove,j));
+						// 		child.pb(temp);
+						// 	}
+						// 	if(boardCell(i+3*fmove,j,n,m) && isColorSoldier(board,i+3*fmove,j,empBlock,empBlock))
+						// 	{
+						// 		temp.board=changeBoard(board,i,j,i+3*fmove,j,false);
+						// 		temp.score=eval(temp.board)+(9000000);
+						// 		if(!isSuicide(temp.board,i+3*fmove,j))
+						// 			temp.score+=(9000000);
+
+						// 		temp.isCannonMove=false;
+						// 		temp.changeCoordi=mp(mp(i,j),mp(i+3*fmove,j));
+						// 		child.pb(temp);
+						// 	}
+						// }	
+				}				
 
 				if(cnt<=1)
 					continue;
@@ -677,7 +797,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 							temp.score=eval(temp.board);
 
 							if(isSuicide(board,i,j))
-								temp.score+=(20000);
+								temp.score-=(20000);
 							/*if(isPartOfCannon)
 								temp.score-=(20000);*/
 							temp.changeCoordi=mp(mp(i,j),mp(i+bmove,j));
@@ -689,7 +809,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 							temp.board=changeBoard(board,i,j,i+bmove,j-2,false);
 							temp.score=eval(temp.board);
 							if(isSuicide(board,i,j))
-								temp.score+=(20000);
+								temp.score-=(20000);
 							/*if(isPartOfCannon)
 								temp.score-=(20000);*/
 							temp.changeCoordi=mp(mp(i,j),mp(i+bmove,j-2));
@@ -701,7 +821,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 							temp.board=changeBoard(board,i,j,i+bmove,j+2,false);
 							temp.score=eval(temp.board);
 							if(isSuicide(board,i,j))
-								temp.score+=(20000);
+								temp.score-=(20000);
 							/*if(isPartOfCannon)
 								temp.score-=(20000);*/
 							temp.changeCoordi=mp(mp(i,j),mp(i+bmove,j+2));
@@ -770,8 +890,10 @@ pair<pair<double,bool>,pair<pii,pii> > miniMaxWithAlphaBetaPruning(node &root, i
 	}
 }
 
-string ErnestMove(vector<vector<int> > &board)
-{
+string ErnestMove(vector<vector<int> > &board,int myColor)
+{	
+	static int first_time=0;
+	int index;
 	node root;
 	root.board=board;
 	
@@ -780,19 +902,55 @@ string ErnestMove(vector<vector<int> > &board)
 	pair<pair<double,bool>,pair<pii,pii> > ans1=miniMaxWithAlphaBetaPruning(root,0,-inf,inf,1);
 	pair<pair<double,bool>,pair<pii,pii> > ans2=miniMaxWithAlphaBetaPruning(root,0,-inf,inf,2);
 	pair<pair<double,bool>,pair<pii,pii> > ans3=miniMaxWithAlphaBetaPruning(root,0,-inf,inf,3);
-	pair<pair<double,bool>,pair<pii,pii> > ans;
-	
-	if(ans1.fi.fi>ans2.fi.fi) ans=ans1;
-	else ans=ans2;
+	// pair<pair<double,bool>,pair<pii,pii> > ans4=miniMaxWithAlphaBetaPruning(root,0,-inf,inf,4);
+	// pair<pair<double,bool>,pair<pii,pii> > ans5=miniMaxWithAlphaBetaPruning(root,0,-inf,inf,5);
 
-	if(ans.fi.fi<ans3.fi.fi) ans=ans3;
+
+	pair<pair<double,bool>,pair<pii,pii> > ans;
+
+	vector<pair<pair<double,bool>,pair<pii,pii> >> answers{ans1,ans2,ans3};
+
+	// cerr << "Reached here 1\n";
+
+	index = best_move(answers);
+	ans = answers[index];
+	answers.erase(answers.begin()+index);
+
+	// cerr << "Reached Here 2\n";
+	
+	// index = best_move(answers);
+
+
+	// adding functionality of removing stalmate
+	if(prev_ans.sec.fi.fi==ans.sec.fi.fi && prev_ans.sec.fi.sec==ans.sec.fi.sec){
+		index = best_move(answers);
+		ans = answers[index];
+		answers.erase(answers.begin()+index);
+	}
+	
+	// cerr << "Final chosen is " << ans.fi.fi << " \n";
 
 	pair<pii,pii> move=ans.sec;
+	prev_ans = ans;
 
-	if(!ans.fi.sec)
-		return ("S "+ to_string(move.fi.sec)+" "+to_string(move.fi.fi)+" M "+to_string(move.sec.sec)+" "+to_string(move.sec.fi));
-	else
-		return ("S "+to_string(move.fi.sec)+ " "+ to_string(move.fi.fi)+" B "+to_string(move.sec.sec)+" "+to_string(move.sec.fi));
+	//Trying to hardcode the first move by the bot
+
+	// if(first_time!=0){	
+		if(!ans.fi.sec)
+			return ("S "+ to_string(move.fi.sec)+" "+to_string(move.fi.fi)+" M "+to_string(move.sec.sec)+" "+to_string(move.sec.fi));
+		else
+			return ("S "+to_string(move.fi.sec)+ " "+ to_string(move.fi.fi)+" B "+to_string(move.sec.sec)+" "+to_string(move.sec.fi));
+	// }
+	// else{
+	// 	first_time++;
+	// 	if(myColor==2){  //White
+	// 		return ("S 3 0 M 2 1");
+	// 	}
+	// 	else if(myColor==1){
+	// 		return ("S 4 7 M 3 6");
+	// 	}
+	// }
+
 }
 
 int main(){
@@ -819,7 +977,7 @@ int main(){
 
 	if(player_id==1)
 	{
-		string str = ErnestMove(Board) ;
+		string str = ErnestMove(Board,player_id) ;
 		cout << str<<endl;
 		
 		if(str[6]=='M')
@@ -840,7 +998,7 @@ int main(){
 		else
 			Board = changeBoard(Board,(t[2]-'0'),(t[1]-'0'),(t[5]-'0'),(t[4]-'0'),1);
 		
-		str = ErnestMove(Board) ;
+		str = ErnestMove(Board,player_id) ;
 		cout << str<<endl;
 		
 		if(str[6]=='M')
