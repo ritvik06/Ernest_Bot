@@ -74,7 +74,6 @@ vector<vector<int> > initializeBoard(int n,int m)
 	}
 
 	return Board;
-
 }
 
 //represents the next state of the board after a move
@@ -126,6 +125,36 @@ bool retLoc(int i,int row, int col)
 5. No of my townhalls under attack
 */
 
+int isSuicide(vector<vector<int> > &board, int i, int j)
+{
+	int n=board.size(),m=board[0].size();
+	int fmove,bmove;
+
+	if(solCol==whiteSol)
+		fmove=1,bmove=-2;
+	else
+		fmove=-1,bmove=2;
+
+	int attk=0;
+	if(boardCell(i+fmove,j,n,m) && isColorSoldier(board,i+fmove,j,oppCol,oppCol)) attk++;
+	if(boardCell(i+fmove,j+1,n,m) && isColorSoldier(board,i+fmove,j+1,oppCol,oppCol)) attk++;
+	if(boardCell(i+fmove,j-1,n,m) && isColorSoldier(board,i+fmove,j-1,oppCol,oppCol)) attk++;
+	if(boardCell(i,j+1,n,m) && isColorSoldier(board,i,j+1,oppCol,oppCol)) attk++;
+	if(boardCell(i,j-1,n,m) && isColorSoldier(board,i,j-1,oppCol,oppCol)) attk++;
+	if(isCannon(board,i-2*fmove,j,i-3*fmove,j,i-4*fmove,j,oppCol)) attk++;
+	if(isCannon(board,i-5*fmove,j,i-3*fmove,j,i-4*fmove,j,oppCol)) attk++;
+	if(isCannon(board,i-2*fmove,j-2,i-3*fmove,j-3,i-4*fmove,j-4,oppCol)) attk++;
+	if(isCannon(board,i-5*fmove,j-5,i-3*fmove,j-3,i-4*fmove,j-4,oppCol)) attk++;
+	if(isCannon(board,i-5*fmove,j+5,i-3*fmove,j+3,i-4*fmove,j+4,oppCol)) attk++;
+	if(isCannon(board,i-2*fmove,j+2,i-3*fmove,j+3,i-4*fmove,j+4,oppCol)) attk++;
+	if(isCannon(board,i,j-2,i,j-3,i,j-4,oppCol)) attk++;
+	if(isCannon(board,i,j-3,i,j-4,i,j-5,oppCol)) attk++;
+	if(isCannon(board,i,j+2,i,j+3,i,j+4,oppCol)) attk++;
+	if(isCannon(board,i,j+3,i,j+4,i,j+5,oppCol)) attk++;
+
+	return attk;
+}
+
 long long eval(vector<vector<int> > &board)
 {
 	int n=board.size(),m=board[0].size();
@@ -137,9 +166,9 @@ long long eval(vector<vector<int> > &board)
 		fmove=-1,bmove=2;
 
 	int numOfSol=0,posAttk=0,posOppAttk=0,posOppAttkOnTH=0,posAttkOnTH=0,numOfOppSol=0;
-	int numOfTH=0,numOfOppTH=0,posCannAttk=0,posOppCannAttk=0;
+	int numOfTH=0,numOfOppTH=0,posCannAttk=0,posOppCannAttk=0,suicide=0;
 	int loc=0,locOpp=0;
-
+	// cerr<<"eval calculating..."<<endl;
 	for(int i=0;i<n;i++)
 	{
 		for(int j=0;j<m;j++)
@@ -195,6 +224,10 @@ long long eval(vector<vector<int> > &board)
 				if(isCannon(board,i+5*fmove,j-5,i+3*fmove,j-3,i+4*fmove,j-4,oppCol)) posOppCannAttk++;
 				if(isCannon(board,i+5*fmove,j+5,i+3*fmove,j+3,i+4*fmove,j+4,oppCol)) posOppCannAttk++;
 				if(isCannon(board,i+2*fmove,j+2,i+3*fmove,j+3,i+4*fmove,j+4,oppCol)) posOppCannAttk++;
+				if(isCannon(board,i,j+2,i,j+3,i,j+4,oppCol)) posOppCannAttk++;
+				if(isCannon(board,i,j-2,i,j-3,i,j-4,oppCol)) posOppCannAttk++;
+				if(isCannon(board,i,j+3,i,j+4,i,j+5,oppCol)) posOppCannAttk++;
+				if(isCannon(board,i,j-3,i,j-4,i,j-5,oppCol)) posOppCannAttk++;
 			}
 
 			if(board[i][j]==oppCol)
@@ -210,13 +243,24 @@ long long eval(vector<vector<int> > &board)
 				if(isCannon(board,i-5*fmove,j-5,i-3*fmove,j-3,i-4*fmove,j-4,solCol)) posCannAttk++;
 				if(isCannon(board,i-5*fmove,j+5,i-3*fmove,j+3,i-4*fmove,j+4,solCol)) posCannAttk++;
 				if(isCannon(board,i-2*fmove,j+2,i-3*fmove,j+3,i-4*fmove,j+4,solCol)) posCannAttk++;
+				if(isCannon(board,i,j+2,i,j+3,i,j+4,oppCol)) posCannAttk++;
+				if(isCannon(board,i,j-2,i,j-3,i,j-4,oppCol)) posCannAttk++;
+				if(isCannon(board,i,j+3,i,j+4,i,j+5,oppCol)) posCannAttk++;
+				if(isCannon(board,i,j-3,i,j-4,i,j-5,oppCol)) posCannAttk++;
+			}
+
+			if(board[i][j]==solCol)
+			{
+				if(isSuicide(board,i,j))
+					suicide++;
 			}
 		}
 	}
 	
 	long long func=posAttk - 30000*posOppAttk + 80*posCannAttk - 50*posOppCannAttk + 100*posAttkOnTH - 100*posOppAttkOnTH 
-				+ numOfTH + 1000000*(4-numOfOppTH) - 60000*locOpp + 800*(12-numOfOppSol);
+				+ numOfTH + 1000000*(4-numOfOppTH) - 60000*locOpp + 800*(12-numOfOppSol)-30000*suicide;
 	
+	// cerr<<"eval calculated!"<<endl;
 	return func;
 }
 
@@ -230,32 +274,6 @@ void printBoard(vector<vector<int> > &board)
 	}
 }
 
-int isSuicide(vector<vector<int> > &board, int i, int j)
-{
-	int n=board.size(),m=board[0].size();
-	int fmove,bmove;
-
-	if(solCol==whiteSol)
-		fmove=1,bmove=-2;
-	else
-		fmove=-1,bmove=2;
-
-	int attk=0;
-	if(boardCell(i+fmove,j,n,m) && isColorSoldier(board,i+fmove,j,oppCol,oppCol)) attk++;
-	if(boardCell(i+fmove,j+1,n,m) && isColorSoldier(board,i+fmove,j+1,oppCol,oppCol)) attk++;
-	if(boardCell(i+fmove,j-1,n,m) && isColorSoldier(board,i+fmove,j-1,oppCol,oppCol)) attk++;
-	if(boardCell(i,j+1,n,m) && isColorSoldier(board,i,j+1,oppCol,oppCol)) attk++;
-	if(boardCell(i,j-1,n,m) && isColorSoldier(board,i,j-1,oppCol,oppCol)) attk++;
-	if(isCannon(board,i-2*fmove,j,i-3*fmove,j,i-4*fmove,j,oppCol)) attk++;
-	if(isCannon(board,i-5*fmove,j,i-3*fmove,j,i-4*fmove,j,oppCol)) attk++;
-	if(isCannon(board,i-2*fmove,j-2,i-3*fmove,j-3,i-4*fmove,j-4,oppCol)) attk++;
-	if(isCannon(board,i-5*fmove,j-5,i-3*fmove,j-3,i-4*fmove,j-4,oppCol)) attk++;
-	if(isCannon(board,i-5*fmove,j+5,i-3*fmove,j+3,i-4*fmove,j+4,oppCol)) attk++;
-	if(isCannon(board,i-2*fmove,j+2,i-3*fmove,j+3,i-4*fmove,j+4,oppCol)) attk++;
-
-	return attk;
-}
-
 void allBranches(vector<node> &child, vector<vector<int> > &board)
 {
 	int n=board.size(),m=board[0].size();
@@ -266,7 +284,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 		fmove=1,bmove=-2;
 	else
 		fmove=-1,bmove=2;
-
+	cerr<<"start making branches..."<<endl;
 	for(int i=0;i<n;i++)
 	{
 		for(int j=0;j<m;j++)
@@ -278,6 +296,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 				bool cannonMoveTown=false, cannonMoveSoldier=false,cannonPart=false;
 				bool fwdMoveTown=false, fwdMoveSoldier=false, sideMoveTown=false;
 
+				cerr<<"Cannon started...";
 				/*Cannon Moves*/
 				/*Orthogonal Cannon*/
 				if(isCannon(board,i,j,i+fmove,j,i+2*fmove,j,solCol)|| isCannon(board,i,j,i-fmove,j,i-2*fmove,j,solCol)||
@@ -347,7 +366,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						cannonPart=true;
 					}	
 				}
-
+				cerr<<"c1";
 				if(isCannon(board,i,j,i+fmove,j+1,i+2*fmove,j+2,solCol))
 				{
 					cannonPart=true;
@@ -405,7 +424,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						child.pb(temp);
 					}
 				}
-
+				cerr<<"c2";
 				if(isCannon(board,i,j,i+fmove,j-1,i+2*fmove,j-2,solCol))
 				{
 					cannonPart=true;
@@ -462,6 +481,67 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						child.pb(temp);
 					}
 				}
+				cerr<<"c3";
+				/*if(isCannon(board,i,j,i,j-1,i,j-2,solCol))
+				{
+					if(boardCell(i,j+2,n,m) && !isColorSoldier(board,i,j+2,solCol,townCol) 
+							&& !isColorSoldier(board,i,j+1,oppCol,solCol))
+					{
+						temp.board=changeBoard(board,i,j,i,j+2,true);
+						temp.score=eval(temp.board);
+						if(isColorSoldier(board,i,j+2,oppTownCol,oppTownCol))
+							temp.score+=(40000000),cannonMoveTown=true;
+						if(isColorSoldier(board,i,j+2,oppCol,oppCol))
+							temp.score+=(9000000),cannonMoveSoldier=true;
+						temp.isCannonMove=true;
+						temp.changeCoordi=mp(mp(i,j),mp(i,j+2));
+						child.pb(temp);
+						cannonPart=true;
+					}
+					if(boardCell(i,j+3,n,m) && !isColorSoldier(board,i,j+3,solCol,townCol) 
+						&& !isColorSoldier(board,i,j+1,oppCol,solCol) && !isColorSoldier(board,i,j+2,townCol,solCol))
+					{
+						temp.board=changeBoard(board,i,j,i,j+3,true);
+						temp.score=eval(temp.board);
+						if(isColorSoldier(board,i,j+3,oppTownCol,oppTownCol))
+							temp.score+=(40000000),cannonMoveTown=true;
+						if(isColorSoldier(board,i,j+3,oppCol,oppCol))
+							temp.score+=(9000000),cannonMoveSoldier=true;
+						temp.isCannonMove=true;
+						temp.changeCoordi=mp(mp(i,j),mp(i,j+3));
+						child.pb(temp);
+						cannonPart=true;
+					}
+					if(boardCell(i,j-4,n,m) && !isColorSoldier(board,i,j-4,solCol,townCol) 
+						&& !isColorSoldier(board,i,j-3,oppCol,solCol))
+					{
+						temp.board=changeBoard(board,i,j,i,j-4,true);
+						temp.score=eval(temp.board);
+						if(isColorSoldier(board,i,j-4,oppTownCol,oppTownCol))
+							temp.score+=(40000000),cannonMoveTown=true;
+						if(isColorSoldier(board,i,j-4,oppCol,oppCol))
+							temp.score+=(9000000),cannonMoveSoldier=true;
+						temp.isCannonMove=true;
+						temp.changeCoordi=mp(mp(i,j),mp(i,j-4));
+						child.pb(temp);
+						cannonPart=true;
+					}
+					if(boardCell(i,j-5,n,m) && !isColorSoldier(board,i,j-5,solCol,townCol) 
+						&& !isColorSoldier(board,i,j-3,oppCol,solCol) && !isColorSoldier(board,i,j-4,townCol,solCol))
+					{
+						temp.board=changeBoard(board,i,j,i,j-5,true);
+						temp.score=eval(temp.board);
+						if(isColorSoldier(board,i,j-5,oppTownCol,oppTownCol))
+							temp.score+=(40000000),cannonMoveTown=true;
+						if(isColorSoldier(board,i,j-5,oppCol,oppCol))
+							temp.score+=(9000000),cannonMoveSoldier=true;
+						temp.isCannonMove=true;
+						temp.changeCoordi=mp(mp(i,j),mp(i,j-5));
+						child.pb(temp);
+						cannonPart=true;
+					}
+				}	*/			
+
 
 				if(isCannon(board,i,j,i+fmove,j,i+2*fmove,j,solCol))
 				{
@@ -493,7 +573,7 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						}
 					}
 				}
-
+				cerr<<"c4";
 				if(isCannon(board,i,j,i+fmove,j+1,i+2*fmove,j+2,solCol))
 				{
 					if(!(cannonMoveSoldier || cannonMoveTown))
@@ -524,8 +604,8 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						}
 					}
 				}
-
-				if(isCannon(board,i,j,i+fmove,j-1,i+2*fmove,j-2,solCol))
+				cerr<<"c5";
+				/*if(isCannon(board,i,j,i+fmove,j-1,i+2*fmove,j-2,solCol))
 				{
 					if(!(cannonMoveTown || cannonMoveSoldier))
 					{
@@ -554,11 +634,42 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 							child.pb(temp);
 						}
 					}
-				}
+				}*/
+				cerr<<"c6";
+				/*if(isCannon(board,i,j,i,j-1,i,j-2,solCol))
+				{
+					if(!(cannonMoveTown || cannonMoveSoldier))
+					{
+						if(boardCell(i,j+1,n,m) && isColorSoldier(board,i,j+1,empBlock,empBlock))
+						{
+							temp.board=changeBoard(board,i,j-2,i,j+1,false);
+							temp.score=eval(temp.board)+(9000000);
+							if(!isSuicide(temp.board,i-fmove,j+1))
+								temp.score+=(9000000);
+
+							temp.isCannonMove=false;
+							temp.changeCoordi=mp(mp(i,j-2),mp(i,j+1));
+							child.pb(temp);
+						}
+						if(boardCell(i,j-3,n,m) && isColorSoldier(board,i,j-3,empBlock,empBlock))
+						{
+							temp.board=changeBoard(board,i,j,i,j-3,false);
+							temp.score=eval(temp.board)+(9000000);
+							if(!isSuicide(temp.board,i,j-3))
+								temp.score+=(9000000);
+							if(!isSuicide(temp.board,i,j-3) && isColorSoldier(board,i,j-6,oppTownCol,oppTownCol))
+								temp.score+=(10000000);
+
+							temp.isCannonMove=false;
+							temp.changeCoordi=mp(mp(i,j),mp(i,j-3));
+							child.pb(temp);
+						}
+					}
+				}*/
 
 				if(cnt<=1)
 					continue;
-
+				cerr<<"Cannon done."<<endl;
 				if(!cannonMoveTown)
 				{
 					if(boardCell(i+fmove, j, n, m) && !isColorSoldier(board,i+fmove,j,solCol,solCol))
@@ -570,8 +681,8 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 							temp.score+=(40000000),locTown=true;
 						else
 						{
-							if(isColorSoldier(board,i+fmove,j,oppCol,oppCol) && !isSuicide(temp.board,i+fmove,j))
-								temp.score+=(200000),locSoldier=true;
+							/*if(isColorSoldier(board,i+fmove,j,oppCol,oppCol) && !isSuicide(temp.board,i+fmove,j))
+								temp.score+=(200000),locSoldier=true;*/
 							if(isSuicide(temp.board,i+fmove,j))
 								temp.score-=(2000000);
 							/*if(isPartOfCannon)
@@ -596,8 +707,8 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 							temp.score+=(40000000),locTown=true;
 						else
 						{
-							if(isColorSoldier(board,i+fmove,j+1,oppCol,oppCol) && !isSuicide(temp.board,i+fmove,j+1))
-								temp.score+=(200000),locSoldier=true;
+							/*if(isColorSoldier(board,i+fmove,j+1,oppCol,oppCol) && !isSuicide(temp.board,i+fmove,j+1))
+								temp.score+=(200000),locSoldier=true;*/
 							if(isSuicide(temp.board,i+fmove,j+1))
 								temp.score-=(2000000);
 							/*if(isPartOfCannon)
@@ -622,8 +733,8 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 							temp.score+=(40000000),locTown=true;
 						else
 						{
-							if(isColorSoldier(board,i+fmove,j-1,oppCol,oppCol) && !isSuicide(temp.board,i+fmove,j-1))
-								temp.score+=(200000),locSoldier=true;
+							/*if(isColorSoldier(board,i+fmove,j-1,oppCol,oppCol) && !isSuicide(temp.board,i+fmove,j-1))
+								temp.score+=(200000),locSoldier=true;*/
 							if(isSuicide(temp.board,i+fmove,j-1))
 								temp.score-=(2000000);
 							/*if(isPartOfCannon)
@@ -641,7 +752,6 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 					}
 				}
 
-				
 				if(!(cannonMoveTown || fwdMoveTown))
 				{
 					/*Sideways Capture Moves*/
@@ -654,8 +764,8 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 							temp.score+=(40000000), sideMoveTown=true;
 						else
 						{
-							if(isColorSoldier(board,i,j+1,oppCol,oppCol) && !isSuicide(temp.board,i,j+1))
-								temp.score+=(20000);
+							/*if(isColorSoldier(board,i,j+1,oppCol,oppCol) && !isSuicide(temp.board,i,j+1))
+								temp.score+=(20000);*/
 							if(isSuicide(temp.board,i,j+1))
 								temp.score-=(2000000);
 							/*if(isPartOfCannon)
@@ -675,8 +785,8 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 							temp.score+=(40000000),sideMoveTown=true;
 						else
 						{
-							if(isColorSoldier(board,i,j-1,oppCol,oppCol) && !isSuicide(temp.board,i,j-1))
-								temp.score+=(20000);
+							/*if(isColorSoldier(board,i,j-1,oppCol,oppCol) && !isSuicide(temp.board,i,j-1))
+								temp.score+=(20000);*/
 							if(isSuicide(temp.board,i,j-1))
 								temp.score-=(2000000);
 							/*if(isPartOfCannon)
@@ -734,10 +844,13 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 			}
 		}
 	}
+
+	cerr<<"branches made."<<endl;
 }
 
 void makeTree(node &root, int depth)
 {
+	cerr<<depth<<endl;
 	if(depth>=maxDepthTree)
 		return;
 
@@ -799,10 +912,13 @@ string ErnestMove(vector<vector<int> > &board)
 	makeTree(root,0);
 
 	pair<pair<double,bool>,pair<pii,pii> > ans1=miniMaxWithAlphaBetaPruning(root,0,-inf,inf,1);
+	cerr<<"MiniMax1 Done!"<<endl;
 	pair<pair<double,bool>,pair<pii,pii> > ans2=miniMaxWithAlphaBetaPruning(root,0,-inf,inf,2);
+	cerr<<"MiniMax2 Done!"<<endl;
 	pair<pair<double,bool>,pair<pii,pii> > ans3=miniMaxWithAlphaBetaPruning(root,0,-inf,inf,3);
+	cerr<<"MiniMax3 Done!"<<endl;
 	pair<pair<double,bool>,pair<pii,pii> > ans;
-	
+
 	if(ans1.fi.fi>ans2.fi.fi) ans=ans1;
 	else ans=ans2;
 
