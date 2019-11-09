@@ -232,11 +232,11 @@ long long eval(vector<vector<int> > &board)
 
 			if(board[i][j]==oppCol)
 			{
-				if(boardCell(i-fmove,j,n,m) && isColorSoldier(board,i-fmove,j,solCol,solCol)) posOppAttk++;
+				/*if(boardCell(i-fmove,j,n,m) && isColorSoldier(board,i-fmove,j,solCol,solCol)) posOppAttk++;
 				if(boardCell(i-fmove,j+1,n,m) && isColorSoldier(board,i-fmove,j+1,solCol,solCol)) posOppAttk++;
 				if(boardCell(i-fmove,j-1,n,m) && isColorSoldier(board,i-fmove,j-1,solCol,solCol)) posOppAttk++;
 				if(boardCell(i,j+1,n,m) && isColorSoldier(board,i,j+1,solCol,solCol)) posOppAttk++;
-				if(boardCell(i,j-1,n,m) && isColorSoldier(board,i,j-1,solCol,solCol)) posOppAttk++;
+				if(boardCell(i,j-1,n,m) && isColorSoldier(board,i,j-1,solCol,solCol)) posOppAttk++;*/
 				if(isCannon(board,i-2*fmove,j,i-3*fmove,j,i-4*fmove,j,solCol)) posCannAttk++;
 				if(isCannon(board,i-5*fmove,j,i-3*fmove,j,i-4*fmove,j,solCol)) posCannAttk++;
 				if(isCannon(board,i-2*fmove,j-2,i-3*fmove,j-3,i-4*fmove,j-4,solCol)) posCannAttk++;
@@ -257,7 +257,7 @@ long long eval(vector<vector<int> > &board)
 	}
 	
 	long long func=posAttk - 30000*posOppAttk + 80*posCannAttk - 50*posOppCannAttk + 100*posAttkOnTH - 100*posOppAttkOnTH 
-				+ numOfTH + 1000000*(4-numOfOppTH) - 60000*locOpp + 800*(12-numOfOppSol)-30000*suicide;
+				+ numOfTH + 1000000*(4-numOfOppTH) /*- 60000*locOpp*/ + 800*(12-numOfOppSol)-30000*suicide;
 	
 	// cerr<<"eval calculated!"<<endl;
 	return func;
@@ -677,7 +677,9 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 						bool locTown=false,locSoldier=false;
 						temp.board=changeBoard(board,i,j,i+fmove,j,false);
 						temp.score=eval(temp.board);
-						if(isColorSoldier(board,i+fmove,j,oppTownCol,oppTownCol))
+						if(isSuicide(temp.board,i+fmove,j))
+							temp.score-=(2000000);
+						/*if(isColorSoldier(board,i+fmove,j,oppTownCol,oppTownCol))
 							temp.score+=(40000000),locTown=true;
 						else
 						{
@@ -687,23 +689,26 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 								temp.score-=(2000000);
 							if(isPartOfCannon)
 								temp.score-=(900000);
-						}
+						}*/
 
 						temp.changeCoordi=mp(mp(i,j),mp(i+fmove,j));
 						temp.isCannonMove=false;
-						if((locTown || locSoldier) || (!(fwdMoveTown || fwdMoveSoldier)))
+						child.pb(temp);
+						/*if((locTown || locSoldier) || (!(fwdMoveTown || fwdMoveSoldier)))
 						{
 							child.pb(temp);
 							if(locTown) fwdMoveTown=true;
 							if(locSoldier) fwdMoveSoldier=true;
-						}
+						}*/
 					}
 					if(boardCell(i+fmove,j+1,n,m) && !isColorSoldier(board,i+fmove,j+1,solCol,solCol))
 					{
 						bool locTown=false,locSoldier=false;
 						temp.board=changeBoard(board,i,j,i+fmove,j+1,false);
 						temp.score=eval(temp.board);
-						if(isColorSoldier(board,i+fmove,j+1,oppTownCol,oppTownCol))
+						if(isSuicide(temp.board,i+fmove,j+1))
+							temp.score-=(2000000);
+						/*if(isColorSoldier(board,i+fmove,j+1,oppTownCol,oppTownCol))
 							temp.score+=(40000000),locTown=true;
 						else
 						{
@@ -713,42 +718,42 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 								temp.score-=(2000000);
 							if(isPartOfCannon)
 								temp.score-=(900000);
-						}
+						}*/
 
 						temp.changeCoordi=mp(mp(i,j),mp(i+fmove,j+1));
 						temp.isCannonMove=false;
-						if((locTown || locSoldier) || (!(fwdMoveTown || fwdMoveSoldier)))
+						child.pb(temp);
+						/*if((locTown || locSoldier) || (!(fwdMoveTown || fwdMoveSoldier)))
 						{
-							child.pb(temp);
 							if(locTown) fwdMoveTown=true;
 							if(locSoldier) fwdMoveSoldier=true;
-						}
+						}*/
 					}
 					if(boardCell(i+fmove,j-1,n,m) && !isColorSoldier(board,i+fmove,j-1,solCol,solCol))
 					{
 						bool locTown=false,locSoldier=false;
 						temp.board=changeBoard(board,i,j,i+fmove,j-1,false);
 						temp.score=eval(temp.board);
-						if(isColorSoldier(board,i+fmove,j-1,oppTownCol,oppTownCol))
+						if(isSuicide(temp.board,i+fmove,j-1))
+							temp.score-=(2000000);
+						/*if(isColorSoldier(board,i+fmove,j-1,oppTownCol,oppTownCol))
 							temp.score+=(40000000),locTown=true;
 						else
 						{
 							if(isColorSoldier(board,i+fmove,j-1,oppCol,oppCol) && !isSuicide(temp.board,i+fmove,j-1))
 								temp.score+=(200000),locSoldier=true;
-							if(isSuicide(temp.board,i+fmove,j-1))
-								temp.score-=(2000000);
 							if(isPartOfCannon)
 								temp.score-=(900000);
-						}
+						}*/
 
 						temp.changeCoordi=mp(mp(i,j),mp(i+fmove,j-1));
 						temp.isCannonMove=false;
-						if((locTown || locSoldier) || (!(fwdMoveTown || fwdMoveSoldier)))
+						child.pb(temp);
+						/*if((locTown || locSoldier) || (!(fwdMoveTown || fwdMoveSoldier)))
 						{
-							child.pb(temp);
 							if(locTown) fwdMoveTown=true;
 							if(locSoldier) fwdMoveSoldier=true;
-						}
+						}*/
 					}
 				}
 
@@ -760,17 +765,17 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 					{
 						temp.board=changeBoard(board,i,j,i,j+1,false);
 						temp.score=eval(temp.board);
-						if(isColorSoldier(board,i,j+1,oppTownCol,oppTownCol))
+						if(isSuicide(temp.board,i,j+1))
+							temp.score-=(2000000);
+						/*if(isColorSoldier(board,i,j+1,oppTownCol,oppTownCol))
 							temp.score+=(40000000), sideMoveTown=true;
 						else
 						{
 							if(isColorSoldier(board,i,j+1,oppCol,oppCol) && !isSuicide(temp.board,i,j+1))
 								temp.score+=(20000);
-							if(isSuicide(temp.board,i,j+1))
-								temp.score-=(2000000);
 							if(isPartOfCannon)
 								temp.score-=(900000);
-						}
+						}*/
 
 						temp.changeCoordi=mp(mp(i,j),mp(i,j+1));
 						temp.isCannonMove=false;
@@ -781,17 +786,17 @@ void allBranches(vector<node> &child, vector<vector<int> > &board)
 					{
 						temp.board=changeBoard(board,i,j,i,j-1,false);
 						temp.score=eval(temp.board);
-						if(isColorSoldier(board,i,j-1,oppTownCol,oppTownCol))
+						if(isSuicide(temp.board,i,j-1))
+							temp.score-=(2000000);
+						/*if(isColorSoldier(board,i,j-1,oppTownCol,oppTownCol))
 							temp.score+=(40000000),sideMoveTown=true;
 						else
 						{
 							if(isColorSoldier(board,i,j-1,oppCol,oppCol) && !isSuicide(temp.board,i,j-1))
 								temp.score+=(20000);
-							if(isSuicide(temp.board,i,j-1))
-								temp.score-=(2000000);
 							if(isPartOfCannon)
 								temp.score-=(900000);
-						}
+						}*/
 
 						temp.changeCoordi=mp(mp(i,j),mp(i,j-1));
 						temp.isCannonMove=false;
