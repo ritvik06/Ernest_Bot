@@ -63,7 +63,7 @@ vector<vector<int> > initializeBoard(int n,int m)
 {
 	vector<vector<int> > Board(n, vector<int>(m,0));
 
-	for(int i=0;i<4;i++){
+	for(int i=0;i<(m/2);i++){
 		Board[0][2*i] = 3;
 		Board[n-1][2*i + 1] = 4;
 		for(int j=0;j<3;j++){
@@ -1004,6 +1004,8 @@ int main(){
 			Board = changeBoard(Board,str[4]-'0',str[2]-'0',str[10]-'0',str[8]-'0',0);	
 		else
 			Board = changeBoard(Board,str[4]-'0',str[2]-'0',str[10]-'0',str[8]-'0',1);	
+
+		printBoard(Board);
 	}
 
 	return 0;
